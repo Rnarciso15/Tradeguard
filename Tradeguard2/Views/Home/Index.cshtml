@@ -1,0 +1,357 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@model IEnumerable<Tradeguard2.Models.Anuncios>
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+@{
+    ViewData["Title"] = "Home Page";
+    int i = 1;
+    var mediaQuery = @"
+          @media only screen and (max-width: 960px) {
+            .card {
+                max-width: 100%;
+                margin: 0 0 20px 0;
+            }
+
+            .card-body {
+                padding: 10px;
+            }
+
+            #titulo {
+                font-size: 16px;
+                margin-bottom: 5px;
+            }
+
+            #Preco {
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+
+             .imagens img{
+            width:70px;
+        }
+
+            #localizacao_hora {
+                font-size: 12px;
+                margin-bottom: 5px;
+            }
+
+            #botao_anunciar {
+                margin-top: 10px;
+                padding: 8px;
+            }
+
+            .destaques > div {
+                flex: 0 0 100%; /* Exibe em coluna, ocupando 100% da largura */
+            }
+     .destaques {
+    display: flex;
+    margin: 20px;
+    margin-top: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+        }
+        }
+    ";
+}
+
+@section Style {
+    <style>
+        .imagem-categoria {
+            transition: transform 0.2s;
+        }
+         .imagens img{
+            width:100px;
+        }
+            .imagem-categoria:hover {
+                transform: translateY(-10px);
+                cursor: pointer;
+            }
+
+        .card:hover {
+            transform: translateY(-10px);
+            cursor: pointer;
+        }
+
+        #Preco {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 0px;
+            margin-left: 5px;
+        }
+
+        #titulo {
+            font-size: 14px;
+            margin-bottom: 10px;
+            margin-left: 5px;
+        }
+
+        #localizacao_hora {
+            font-size: 12px;
+            margin-bottom: 0px;
+            margin-left: 5px;
+        }
+
+        .card-body {
+            text-align: left;
+        }
+
+        #botao_anunciar {
+            text-decoration:none;
+            color: white;
+            background-color: #112647;
+            border-color: white;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            margin-top: 20px;
+            padding:5px;
+        }
+
+            #botao_anunciar:hover {
+                color: #112647;
+                background-color: white;
+                border-color: #112647;
+                border-radius: 10px;
+                border-width: 2px;
+                border-style: solid;
+                margin-top: 20px;
+                padding: 5px;
+            }
+
+        .categorias {
+            background-color: white;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .imagens {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: 20px;            
+    justify-content: space-around;
+        }
+
+
+        .card {
+            background-color: white;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+           -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding-top: 20px;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-bottom: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+
+        .imagens > a {
+            flex: 0 0 calc(15% - 10px);
+            margin: 5px;
+        }
+
+        .destaques {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: 20px;
+            margin-top: 40px;
+        }
+
+            .destaques > div {
+                flex: 0 0 calc(25% - 10px);
+                margin: 5px;
+            }
+
+        .categorias a {
+            background-color: transparent;
+            text-decoration: none;
+            color: black;
+        }
+          @Html.Raw(mediaQuery)    
+    </style> 
+    }
+
+<div class="text-center">
+    <form id="categoriaForm" asp-action="Index" asp-controller="Anuncios">
+        <input id="InputCategoria" type="hidden" name="Categoria" >
+    <div class="categorias">
+        <h1>Categorias dos anúncios</h1>
+        <div class="imagens">
+            <a onclick="CategoriaSelecionada('Carros, motos e barcos')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/car.png"   alt="Carros, motos e barcos">
+                <p>Carros, motos e barcos</p>
+            </a>
+            <a onclick="CategoriaSelecionada('Imóveis')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/new-house.png"   alt="Imóveis">
+                <p>Imóveis</p>
+            </a>
+            <a onclick="CategoriaSelecionada('Bebé e Criança')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/toys.png"   alt="Bebé e Criança">
+                <p>Bebé e Criança</p>
+            </a>
+            <a onclick="CategoriaSelecionada('Lazer')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/paddle.png"   alt="Lazer">
+                <p>Lazer</p>
+            </a>
+            <a onclick="CategoriaSelecionada('Telemóveis e Tablets')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/smartphone.png"   alt="Telemóveis e Tablets">
+                <p>Telemóveis e Tablets</p>
+            </a>
+
+
+
+            <a onclick="CategoriaSelecionada('Agricultura')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/tractor.png"   alt="Agricultura">
+                <p>Agricultura</p>
+            </a>
+            <a onclick="CategoriaSelecionada('Animais')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/pet.png"   alt="Animais">
+                <p>Animais</p>
+            </a>
+            <a onclick="CategoriaSelecionada('Desporto')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/sports.png"   alt="Desporto">
+                <p>Desporto</p>
+            </a>
+            <a onclick="CategoriaSelecionada('Moda')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/wardrobe.png"   alt="Moda">
+                <p>Moda</p>
+            </a>
+            <a onclick="CategoriaSelecionada('Móveis, Casa e Jardim')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/armchair.png"   alt="Móveis, Casa e Jardim">
+                <p>Móveis, Casa e Jardim</p>
+            </a>
+
+
+            <a onclick="CategoriaSelecionada('Tecnologia')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/computer.png"   alt="Tecnologia">
+                <p>Tecnologia</p>
+            </a>
+            <a onclick="CategoriaSelecionada('Equipamentos e Ferramentas')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/wrench.png"   alt="Equipamentos e Ferramentas">
+                <p>Equipamentos e Ferramentas</p>
+            </a>
+            <a onclick="CategoriaSelecionada('Outras Vendas')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/menu.png"   alt="Outras Vendas">
+                <p>Outras Vendas</p>
+            </a>
+
+            <a onclick="CategoriaSelecionada('Todas as Vendas')">
+                <img class="imagem-categoria" src="~/Imagens/icons/categorias/package.png"   alt="Todas as Vendas">
+                <p>Todas as Vendas</p>
+            </a>
+
+
+        </div>
+    </div>
+    </form>
+    <h1 style="text-align:center;margin-top:20px;margin-bottom:10px;">Destaques Principais</h1>
+    <div class="destaques">
+            @try
+            {
+            
+       
+            @foreach (var item in Model)
+            {
+                var user = await UserManager.GetUserAsync(User);
+                var UserAnunciosFavoritos = new List<Favoritos>();  
+
+                if (user != null)
+                {
+                    UserAnunciosFavoritos = await ApplicationDbContext.Favoritos
+                        .Where(m => m.Id_Anuncio == item.Id_anuncio && m.CC == user.CC)
+                        .ToListAsync();
+                }
+                <div class="card" style="max-width:20rem;">
+                    <div class="imgProduto">
+                        <img class="card-img-top" style="border-radius:10px;max-height: 250px;" src="@ImageHelper.GetImageLink(@item.Imagem_destaque, "AnunciosEnviado")" alt="Imagem do Produto" asp-append-version="true" />
+                    </div>
+                     <div class="card-body">
+                        <p id="titulo">@Html.DisplayFor(modelItem => item.Titulo)</p>
+                        <p id="Preco">@Html.DisplayFor(modelItem => item.Preco)</p>
+                        <p id="localizacao_hora">@Html.DisplayFor(modelItem => item.localizacao)</p>
+                    
+                        <div style="display :flex;">
+                            <a asp-action="Details" asp-controller="Anuncios" asp-route-id="@item.Id_anuncio" id="botao_anunciar">Ver Anúncio</a>
+                      
+                                <form asp-action="Create" asp-controller="Favoritos">
+                                    <input type="hidden" name="Id_Anuncio" value="@item.Id_anuncio">
+                                    <button type="submit" id="botao_anunciar">
+                                    @if (user == null || UserAnunciosFavoritos.Count == 0)
+                                    {
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                                            <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.920 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                                        </svg>
+                                    }
+                                    else
+                                    {
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314" />
+                                        </svg>
+                                    }
+                                    </button>
+                                </form>
+                        
+                     
+              
+                
+                       
+
+                        </div>
+                    </div>
+                </div>
+
+                if (i == 8)
+                {
+                    break;
+                }
+                else
+                {
+                    i += 1;
+                }
+            
+           
+            }
+             }
+            catch (Exception ex)
+            {
+            
+            }
+    </div>
+
+
+
+
+
+
+
+
+</div>
+
+@section Scripts {
+    <script>
+        var categoriaAtual = '';
+
+      function CategoriaSelecionada(categoria) {
+          document.getElementById("InputCategoria").value = categoria;
+          document.getElementById("categoriaForm").submit();
+      }
+ 
+
+
+    </script>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+}
+

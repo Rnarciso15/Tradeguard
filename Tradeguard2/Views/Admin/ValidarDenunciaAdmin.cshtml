@@ -1,0 +1,353 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@model DenunciasAnunciosImagensViewModel
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+@{
+    ViewData["Title"] = "Home Page";
+    
+    var mediaQuery = @"
+          @media only screen and (max-width: 960px) {
+              .CardUser_CardAnuncios{
+            display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+        }
+          }
+
+        @media only screen and (max-width: 768px) {
+               .CardUser_CardAnuncios{
+            display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+        }
+.JuntarCorrossel{
+        display: flex;
+    flex-direction: column;
+    /* gap: 15px;*/
+
+                  }
+
+         @media only screen and (max-width: 1300px)  {
+
+        }
+ 
+
+    ";
+}
+
+@section Style {
+  <style>
+      .carousel-image {
+    max-width: 100%; /* Defina o tamanho máximo desejado */
+    height: auto; /* Mantém a proporção da imagem */
+    border-radius:10px;
+}
+      .h1{
+          font-size: 30px;
+      }
+      .alinhar{
+          display:flex;
+          justify-content:space-between;
+      }
+      .Card_ImgSlide{
+          background-color: white;
+        box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+        -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+      .CardUser , .CardAnuncios {
+            display: flex;            
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            width: 100%;
+            background-color: white;
+            transition: transform 0.2s;
+            -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .OrganizarBotoes{
+          
+    
+    border: 1px solid #e0e0e0;
+
+    overflow: hidden;
+    width: 100%;
+    background-color: white;
+    transition: transform 0.2s;
+    -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+        }
+        .imgProposta {
+            flex: 1;
+            max-width: 300px;
+            border-radius: 10px 0 0 10px;
+        }
+
+        .imgProposta img {
+            width: 100%;
+            border-radius: 10px;
+            height: auto;
+        }
+
+        .card-info-proposta {
+            flex: 2;
+            padding: 20px;
+        }
+
+        #tituloProposta {
+            font-size: 24px;
+            font-weight: bold;
+            align-items: start;
+        }
+
+        #precoProposta {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 0px;
+            margin-left: 5px;
+        }
+        .CardUser_CardAnuncios{
+            display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 15px;
+        }
+        .JuntarCorrossel{
+            
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
+            justify-content: space-around;
+
+        }
+        
+        #denunciar{
+            color: white;
+    background-color: #ba2121;
+    border-radius: 10px;
+    border-style: solid;
+    border-width: 1px;
+        }
+        #denunciar:hover{
+                color:  #ba2121;
+                border-color: #ba2121;
+                background-color: white;
+                border-style: solid;
+                border-width: 1px;
+        }
+        #aceitar{
+                color: white;
+                background-color: #1d8412;
+                border-style: solid;
+                border-width: 1px;
+                border-radius: 10px;
+        }
+        #aceitar:hover{
+                color: #1d8412;
+                border-color:#1d8412;
+                background-color: white;
+                border-style: solid;
+                border-width: 1px;
+                border-radius: 10px;
+        }
+        .carousel-inner {
+    position: relative;
+    max-width: 100%;
+    overflow: hidden;
+}
+           @Html.Raw(mediaQuery)
+           <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    </style> 
+    }
+     
+  
+ @functions {
+    public async Task<string> GetUserAvatarUrlAsync(string userId)
+    {
+        var user = await ApplicationDbContext.Users.FirstOrDefaultAsync(p => p.Id == userId);
+        if (user != null && user.ProfilePicture != null && user.ProfilePicture.Length > 0)
+        {
+            var base64String = Convert.ToBase64String(user.ProfilePicture);
+            return $"data:image/jpeg;base64,{base64String}";
+        }
+
+        return "/path/to/default/avatar.png";
+    }
+}
+ 
+@{
+    var anuncios = Model;
+    var id_anuncio = 0;
+    var imagensAnuncio = ViewData["ImagensAnuncio"] as List<Imagens_Anuncios>;
+
+}
+
+<div class="CardUser_CardAnuncios">
+    @foreach (var item in Model.Anuncios)
+    {
+       
+        <div class="CardUser">
+            <div class="imgProposta">
+                <img class="card-img-top" src="@(await GetUserAvatarUrlAsync(item.UserId))" alt="Imagem do Anúncio" />
+            </div>
+            <div class="card-info-proposta">
+                <p id="tituloProposta">@item.User.Nome</p>
+                <p id="precoProposta">@item.User.Telemovel</p>
+                <p id="localizacao_hora">@item.User.Email</p>
+                <div class="button-container"></div>
+            </div>
+        </div>
+
+        <div class="CardAnuncios">
+            <div class="imgProposta">
+                <img class="card-img-top" src="@ImageHelper.GetImageLink(item.Imagem_destaque, "AnunciosEnviado")" alt="Imagem do Anúncio" asp-append-version="true" />
+            </div>
+            <div class="card-info-proposta">
+                <p id="tituloProposta">@item.Titulo</p>
+                <p id="precoProposta">@item.Preco€</p>
+                <p id="localizacao_hora">@item.localizacao</p>
+                <div class="button-container"></div>
+            </div>
+        </div>
+    }
+</div> 
+@foreach (var imagens in Model.AnuncioValidado)
+{  
+    id_anuncio = imagens.Id_anuncio;
+    <div  class="JuntarCorrossel">
+ 
+  
+  <div class="Card_ImgSlide">
+        <h1>Imagens do Envio</h1>
+        <div class="carrossel">
+            <div id="carouselImagemDestaque" class="carousel slide" data-ride="carousel" data-interval="0">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img class="d-block w-100 carousel-image" src="@ImageHelper.GetImageLink(imagens.Imagem_destaque,"AnunciosPorValidar")" alt="First slide" asp-append-version="true">
+                    </div>
+                    <div class="carousel-item">
+                        <img class="d-block w-100 carousel-image" src="@ImageHelper.GetImageLink(imagens.Imagem_destaque1,"AnunciosPorValidar")" alt="Second slide" asp-append-version="true">
+                    </div>
+                    <!-- Adicione os demais itens do carrossel conforme necessário -->
+                </div>
+                <a class="carousel-control-prev" href="#carouselImagemDestaque" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only"></span>
+                </a>
+                <a class="carousel-control-next" href="#carouselImagemDestaque" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+<div class="Card_ImgSlide">
+    <h1>Imagens da colheita</h1>
+    <div class="carrossel">
+      <div id="carouselExampleControls" class="carousel slide" data-ride="carousel" data-interval="0">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img class="d-block w-100 carousel-image" src="@ImageHelper.GetImageLink(imagens.Imagem_destaque2,"AnunciosEnviado")" alt="First slide"asp-append-version="true">
+        </div>
+        <div class="carousel-item">
+            <img class="d-block w-100 carousel-image" src="@ImageHelper.GetImageLink(imagens.Imagem_destaque3,"AnunciosEnviado")" alt="Second slide"asp-append-version="true">
+        </div>
+        <!-- Adicione os demais itens do carrossel conforme necessário -->
+    </div>
+    <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only"></span>
+    </a>
+    <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only"></span>
+    </a>
+</div>
+    </div>
+</div>
+
+
+</div>
+}
+
+
+   @foreach (var item in Model.Denuncias)
+    {
+        id_anuncio = item.Id_Anuncio;
+        <div class="CardUser">
+           
+            <div class="card-info-proposta">
+                <p id="tituloProposta">Tipo: @item.Tipo</p>
+                <p id="precoProposta">SubTipo: @item.SubTipo</p>
+                <p id="localizacao_hora">Data: @item.Data</p>
+                <div class="button-container"></div>
+            </div>
+        </div>
+         }
+           @foreach (var item in Model.Anuncios)
+    {
+        <div class="CardAnuncios">           
+            <div class="card-info-proposta">
+                <p id="tituloProposta">Email: @item.Email</p>
+                <p id="precoProposta"> Descrição: @item.descricao</p>
+                <p id="localizacao_hora">Telemóvel: @item.Telemovel</p>
+                <div class="button-container"></div>
+            </div>
+        </div>
+       }
+
+
+<div class="OrganizarBotoes">
+    <form asp-action="ValidarDenuncia" asp-controller="Admin">
+        <div class="alinhar">
+                <input type="hidden"name="id_anuncio" value="@id_anuncio">              
+                <button type="submit" class="btn btn-primary" name="SubmitButton" id="remover" value="remover" data-toggle="modal" data-target="#exampleModalDenuncia" >
+                            Remover Anuncio
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-flag-fill" viewBox="0 0 16 16">
+                                <path d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12.435 12.435 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A19.626 19.626 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a19.587 19.587 0 0 0 1.349-.476l.019-.007.004-.002h.001" />
+                            </svg>
+                </button>
+                 <button type="submit" class="btn btn-primary" name="SubmitButton" id="nao remover" value="nao remover" data-toggle="modal" data-target="#exampleModalDenuncia" >
+                            Não Remover Anuncio
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-flag-fill" viewBox="0 0 16 16">
+                                <path d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12.435 12.435 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A19.626 19.626 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a19.587 19.587 0 0 0 1.349-.476l.019-.007.004-.002h.001" />
+                            </svg>
+                </button>
+    </div>
+    </form>
+   
+</div>
+
+
+
+ 
+@section Scripts {
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+ 
+
+}
+

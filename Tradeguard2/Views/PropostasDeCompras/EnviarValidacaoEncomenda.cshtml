@@ -1,0 +1,488 @@
+﻿@model IEnumerable<Anuncios>
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@using Tradeguard2.Helpers
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+@{
+    ViewData["Title"] = "Index";
+
+    var mediaQueryAnuncios = @"
+        @media screen and (max-width: 960px) {
+            .cardProposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                flex-direction: column;
+                /* Adicione outros estilos conforme necessário */
+            }
+  .button-container{
+    display:block;
+        }
+            .imgProposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                max-width: 100%;
+                border-radius: 10px 10px 0 0;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .card-info-proposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                padding: 10px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            #tituloProposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                font-size: 20px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            #precoProposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                font-size: 15px;
+                font-weight: bold;
+                margin-bottom: 0px;
+                margin-left: 0px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .button-container-proposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                flex-direction: column;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .button-acao,
+            .button-recusar,
+            #botao_anunciar {
+                width: 100%;
+                padding: 8px;
+                /* Adicione outros estilos conforme necessário */
+            }
+    .Tirar_Foto {
+            flex-direction: column;
+        }
+
+        #cameraPreview {
+            border-radius: 10px;
+        }
+
+        #captureButton {
+            width: 100%;
+            margin-top: 10px;
+        }
+        }
+    ";
+
+    var mediaQueryPropostas = @"
+        @media screen and (max-width: 600px) {
+            .cardProposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                flex-direction: column;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .imgProposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                max-width: 100%;
+                border-radius: 10px 10px 0 0;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .card-info-proposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                padding: 10px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            #tituloProposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                font-size: 20px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            #precoProposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                font-size: 15px;
+                font-weight: bold;
+                margin-bottom: 0px;
+                margin-left: 0px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .button-container-proposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                flex-direction: column;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .button-acao,
+            .button-recusar,
+            #botao_anunciar {
+                width: 100%;
+                padding: 8px;
+                /* Adicione outros estilos conforme necessário */
+            }
+        }
+    ";
+}
+
+@section Style {
+    <style>
+        .modal-body {
+    display: flex;
+    position: relative;
+    flex: 1 1 auto;
+    padding: 1rem;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+        .img-fluid{
+            border-radius:10px;
+        }
+        /* (Estilos existentes) */
+ .cardProposta {
+            display: flex;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            width: 100%;
+            background-color: white;
+            transition: transform 0.2s;
+          -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+         #cameraPreview {
+            border-radius: 10px;
+        }
+        .imgProposta {
+            flex: 1;
+            max-width: 300px;
+            border-radius: 10px 0 0 10px;
+        }
+
+        .imgProposta img {
+            width: 100%;
+            border-radius: 10px;
+            height: auto;
+        }
+
+        .card-info-proposta {
+            flex: 2;
+            padding: 20px;
+        }
+
+        #tituloProposta {
+            font-size: 24px;
+            font-weight: bold;
+            align-items: start;
+        }
+
+        #precoProposta {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 0px;
+            margin-left: 5px;
+        }
+
+        .button-container-proposta {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button-acao, .button-recusar {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .button-acao:hover, .button-recusar:hover {
+            background-color: white;
+            color: #4CAF50;
+            border-color: #4CAF50;
+            border-width: 1px;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .separador {
+            border-top: 1px solid #112647;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        #botao_anunciar {
+             color: #112647;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            text-decoration: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #botao_anunciar:hover {
+            color: white;
+            background-color: #112647;
+            border-color: white;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            text-decoration: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #btnDelete{
+                color: white;
+            background-color: #112647;
+            border-color: white;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            text-decoration: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #btnDelete:hover{
+             color: #112647;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            text-decoration: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .button-container{
+            display: flex;
+        gap: 10px;
+        }
+        .Tirar_Foto{
+            display: flex;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            width: 100%;
+            background-color: white;
+            transition: transform 0.2s;
+            -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+       .captureButton{
+               color: white;
+            background-color: #112647;
+            border-color: white;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            text-decoration: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+       .captureButton:hover{
+               color: #112647;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            text-decoration: none;
+            padding: 10px;
+            cursor: pointer;
+
+        }
+        @Html.Raw(mediaQueryAnuncios)
+        @Html.Raw(mediaQueryPropostas)
+    </style>
+}
+<div>
+ <div class="organizador_botoes" style="margin-top:30px;">
+        <div>
+            <h1 class="titulo">Enviar Anúncio</h1>
+        </div>
+    </div>
+    <div class="separador"></div>
+    @{
+        var userLoginId = await UserManager.GetUserAsync(User);
+    }
+
+    @if (Model.Any())
+    {
+        @foreach (var item in Model)
+        {
+            <div class="cardProposta">
+                <div class="imgProposta">
+                    <img class="card-img-top" src="@ImageHelper.GetImageLink(item.Imagem_destaque, "AnunciosEnviado")" alt="Imagem do Anúncio" asp-append-version="true" />
+                </div>
+                <div class="card-info-proposta">
+                    <p id="tituloProposta">@Html.DisplayFor(modelItem => item.Titulo)</p>
+                    <p id="precoProposta">@Html.DisplayFor(modelItem => item.Preco)€</p>
+                    <p id="localizacao_hora">@Html.DisplayFor(modelItem => item.localizacao)</p>
+                </div>
+            </div>
+
+            <div class="Tirar_Foto">
+                <video id="cameraPreview_@item.Id_anuncio" width="100%" height="auto" style="border-radius:10px;" autoplay playsinline></video>
+                <button id="captureButton_@item.Id_anuncio" class="captureButton" data-count="0" data-target="#exampleModalProposta_@item.Id_anuncio">Tirar Foto</button>
+            </div>
+          
+            <div class="modal fade" id="exampleModalProposta_@item.Id_anuncio" tabindex="-1" role="dialog" aria-labelledby="exampleModalPropostaTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLongTitle">Visualizar foto</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <img id="capturedImage1_@item.Id_anuncio" class="img-fluid" alt="Primeira Imagem Capturada">
+                            <img id="capturedImage2_@item.Id_anuncio" class="img-fluid" alt="Segunda Imagem Capturada">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="close btn btn-secondary" data-dismiss="modal" aria-label="Close" >Fechar</button>
+                            <form asp-action="CreateValidacaoEnviado" asp-controller="PropostasDeCompras" method="post">
+                                <input type="hidden" id="Imagem_destaque_@item.Id_anuncio" name="Imagem_destaque" />
+                                <input type="hidden" id="Imagem_destaque1_@item.Id_anuncio" name="Imagem_destaque1" />
+                                @{
+                                    var userAnuncio = await UserManager.FindByIdAsync(item.UserId);
+                                }
+                                <input type="hidden" id="Id_Anuncio" name="Id_anuncio" value="@item.Id_anuncio" />
+                                @{
+                                    var propostasuser = await ApplicationDbContext.PropostasDeCompra.FirstOrDefaultAsync(p => p.CC_vendedor == userAnuncio.CC && p.Produto_recebido == false && p.Id_Anuncio == item.Id_anuncio);
+
+                                }
+                                
+                                <input type="hidden" id="CC_Vendedor" name="CC_Comrador" value="@propostasuser.CC_comprador" />
+                                <input type="hidden" id="Id_proposta" name="Id_proposta" value="@propostasuser.Id_Proposta" />
+                                <button type="submit" class="btn btn-danger" id="btnConfirmDelete">Guardar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+    }
+</div>
+
+
+@section Scripts {
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+ document.addEventListener("DOMContentLoaded", function () {
+    const captureButtons = document.querySelectorAll(".captureButton");
+
+    captureButtons.forEach(button => {
+        const id = button.getAttribute("id").split("_")[1];
+        const cameraPreview = document.getElementById(`cameraPreview_${id}`);
+        const modal = document.getElementById(`exampleModalProposta_${id}`);
+        const hiddenInputFirst = modal.querySelector(`#Imagem_destaque_${id}`);
+        const hiddenInputSecond = modal.querySelector(`#Imagem_destaque1_${id}`);
+        const capturedImage1 = document.getElementById(`capturedImage1_${id}`);
+        const capturedImage2 = document.getElementById(`capturedImage2_${id}`);
+
+        let count = 0;
+        let photoUrls = ['', '']; // Array para armazenar as URLs das fotos tiradas
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                cameraPreview.srcObject = stream;
+            })
+            .catch(function (error) {
+                console.error("Erro ao acessar a câmera:", error);
+            });
+
+        button.addEventListener("click", function () {
+            if (count < 2) {
+                count++;
+
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+
+                canvas.width = cameraPreview.videoWidth;
+                canvas.height = cameraPreview.videoHeight;
+
+                context.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
+
+                const dataURL = canvas.toDataURL("image/png");
+
+                // Armazena a URL da foto tirada no array
+                photoUrls[count - 1] = dataURL;
+
+                // Atualiza a tag <img> correspondente na modal com a URL da foto tirada
+                if (count === 1) {
+                    capturedImage1.src = dataURL;
+                    alert("Por favor, tire a segunda foto.");
+                } else if (count === 2) {
+                    capturedImage2.src = dataURL;
+                    $('#exampleModalProposta_' + id).modal('show');
+                }
+            }
+        });
+        modal.querySelector('.modal-footer .btn-secondary').addEventListener('click', function () {
+            $('#exampleModalProposta_' + id).modal('hide');
+        });
+
+        // Evento para fechar a modal quando o botão "X" é clicado
+        modal.querySelector('.close').addEventListener('click', function () {
+            $('#exampleModalProposta_' + id).modal('hide');
+        });
+        modal.addEventListener('hidden.bs.modal', function (event) {
+            // Zera o contador count
+            count = 0;
+            // Reseta/apaga as fotos
+            capturedImage1.src = '';
+            capturedImage2.src = '';
+            // Limpa o array de URLs das fotos
+            photoUrls = ['', ''];
+        });
+
+        // Ao abrir a modal, define as imagens nas tags <img> com as URLs armazenadas
+        modal.addEventListener('shown.bs.modal', function (event) {
+            capturedImage1.src = photoUrls[0];
+            capturedImage2.src = photoUrls[1];
+        });
+
+        const form = modal.querySelector('form');
+        form.addEventListener('submit', function (event) {
+            // Define os valores dos campos Imagem_destaque e Imagem_destaque1 nos inputs hidden
+            hiddenInputFirst.value = capturedImage1.src;
+            hiddenInputSecond.value = capturedImage2.src;
+        });
+    });
+});
+
+</script>
+
+
+
+
+}
+
+
+
+
+
+

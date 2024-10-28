@@ -1,0 +1,320 @@
+﻿@model IEnumerable<PropostasDeCompra>
+
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@using Tradeguard2.Helpers
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+@{
+    ViewData["Title"] = "Index";
+
+    var mediaQueryAnuncios = @"
+        @media screen and (max-width: 960px) {
+            .cardProposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                flex-direction: column;
+                /* Adicione outros estilos conforme necessário */
+            }
+  .button-container{
+    display:block;
+        }
+            .imgProposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                max-width: 100%;
+                border-radius: 10px 10px 0 0;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .card-info-proposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                padding: 10px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            #tituloProposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                font-size: 20px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            #precoProposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                font-size: 15px;
+                font-weight: bold;
+                margin-bottom: 0px;
+                margin-left: 0px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .button-container-proposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                flex-direction: column;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .button-acao,
+            .button-recusar,
+            #botao_anunciar {
+                width: 100%;
+                padding: 8px;
+                /* Adicione outros estilos conforme necessário */
+            }
+        }
+    ";
+
+    var mediaQueryPropostas = @"
+        @media screen and (max-width: 600px) {
+            .cardProposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                flex-direction: column;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .imgProposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                max-width: 100%;
+                border-radius: 10px 10px 0 0;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .card-info-proposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                padding: 10px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            #tituloProposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                font-size: 20px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            #precoProposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                font-size: 15px;
+                font-weight: bold;
+                margin-bottom: 0px;
+                margin-left: 0px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .button-container-proposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                flex-direction: column;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .button-acao,
+            .button-recusar,
+            #botao_anunciar {
+                width: 100%;
+                padding: 8px;
+                /* Adicione outros estilos conforme necessário */
+            }
+        }
+    ";
+}
+
+@section Style {
+    <style>
+        /* (Estilos existentes) */
+ .cardProposta {
+            display: flex;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            width: 100%;
+            background-color: white;
+            transition: transform 0.2s;
+            -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .imgProposta {
+            flex: 1;
+            max-width: 300px;
+            border-radius: 10px 0 0 10px;
+        }
+
+        .imgProposta img {
+            width: 100%;
+            border-radius: 10px;
+            height: auto;
+        }
+
+        .card-info-proposta {
+            flex: 2;
+            padding: 20px;
+        }
+
+        #tituloProposta {
+            font-size: 24px;
+            font-weight: bold;
+            align-items: start;
+        }
+
+        #precoProposta {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 0px;
+            margin-left: 5px;
+        }
+
+        .button-container-proposta {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button-acao, .button-recusar {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .button-acao:hover, .button-recusar:hover {
+            background-color: white;
+            color: #4CAF50;
+            border-color: #4CAF50;
+            border-width: 1px;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .separador {
+            border-top: 1px solid #112647;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        #botao_anunciar {
+            color: white;
+            background-color: #112647;
+            border-color: white;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            text-decoration: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #botao_anunciar:hover {
+            color: #112647;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            text-decoration: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .button-container{
+            display: flex;
+        gap: 10px;
+        }
+
+        @Html.Raw(mediaQueryAnuncios)
+        @Html.Raw(mediaQueryPropostas)
+    </style>
+}
+
+<div>
+    <div class="organizador_botoes" style="margin-top:30px;">
+        <div>
+            <h1 class="titulo">Lista de Anúncios por Validar</h1>
+        </div>
+    </div>
+    <div class="separador"></div>
+    @{
+
+   var userLoginId = await UserManager.GetUserAsync(User);
+
+    var anuncios = await ApplicationDbContext.Anuncios
+    .Where(a => a.UserId != userLoginId.Id) 
+    .ToListAsync();
+
+    var propostaAnuncio = await ApplicationDbContext.PropostasDeCompra
+    .Where(a => a.CC_comprador == userLoginId.CC && a.Proposta_Aceite == true && a.Produto_recebido == false) 
+    .ToListAsync();
+
+    var anunciosEnviados = await ApplicationDbContext.AnuncioValidado
+    .Where(a => a.CC_Comrador == userLoginId.CC && a.Recebido == false ) 
+    .ToListAsync();
+
+
+  var resultado = anuncios
+    .Join(propostaAnuncio,
+        anuncio => anuncio.Id_anuncio,
+        proposta => proposta.Id_Anuncio,
+        (anuncio, proposta) => new { Anuncio = anuncio, Proposta = proposta })
+    .Join(anunciosEnviados,
+        joined => joined.Anuncio.Id_anuncio,
+        anuncioValidado => anuncioValidado.Id_anuncio,
+        (joined, anunciosvalidado) => new PropostaAnuncioViewModel
+        {
+            Proposta = joined.Proposta,
+            Anuncio = joined.Anuncio,
+            AnuncioValidado = new List<AnuncioValidado> { anunciosvalidado }  // Convert single object to list
+        })
+    .ToList();
+
+
+   
+   }
+
+
+@if (resultado.Any())
+{
+
+    @foreach (var anuncio in resultado)
+    {
+            var UserAnunciosFavoritos = await ApplicationDbContext.Favoritos
+                .Where(m => m.Id_Anuncio == anuncio.Anuncio.Id_anuncio && m.CC == userLoginId.CC)
+                .ToListAsync();
+
+            <div class="cardProposta">
+                <div class="imgProposta">
+                    <img class="card-img-top" src="@ImageHelper.GetImageLink(anuncio.Anuncio.Imagem_destaque, "AnunciosEnviado")" alt="Imagem do Anúncio" asp-append-version="true" />
+                </div>
+                <div class="card-info-proposta">
+                    <p id="tituloProposta">@Html.DisplayFor(modelItem => anuncio.Anuncio.Titulo)</p>
+                    <p id="precoProposta">@Html.DisplayFor(modelItem => anuncio.Anuncio.Preco)€</p>
+                    <p id="localizacao_hora">@Html.DisplayFor(modelItem => anuncio.Anuncio.localizacao)</p>
+                    <div class="button-container">
+                        <form asp-action="Details" asp-controller="Anuncios" method="post">
+                            <input type="hidden" name="id" value="@anuncio.Anuncio.Id_anuncio" />
+                            <button type="submit" id="botao_anunciar">Ver Anúncio</button>
+                        </form>
+                        <form asp-action="EnviarValidacao" asp-controller="PropostasDeCompras" method="post">
+                            <input type="hidden" name="id_anuncio" value="@anuncio.Anuncio.Id_anuncio" />
+                            <button type="submit" id="botao_anunciar">Validar Anúncio</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+     
+    }
+}
+else
+{
+    <p>O utilizador não tem Anúncios por Validar.</p>
+}
+
+
+
+   
+</div>
+

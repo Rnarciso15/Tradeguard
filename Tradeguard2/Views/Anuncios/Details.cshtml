@@ -1,0 +1,917 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using NToastNotify
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@model Tradeguard2.Models.Anuncios
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+@inject IToastNotification _toastNotification;
+
+@{
+    ViewData["Title"] = "Details";
+      var mediaQuery = @" 
+        @media only screen and (max-width: 960px) {
+  .modal {
+    width: 100%;
+    max-width: 768px; /* Defina um valor máximo para a largura da modal */
+    margin: 0 auto; /* Centralizar horizontalmente */
+}
+
+/* Estilos para o conteúdo da modal */
+.modal-content {
+    width: 100%;
+}
+ .modal {
+        max-width: 100%; /* Modifica a largura máxima para ocupar toda a largura da tela */
+    }
+        .div_container,
+        .info-utilizador,
+        .descricao,
+        #Card_denunciar,
+        .info-anuncio,
+        .botoes_denunciar,
+        .Info-anuncio {
+            padding: 20px;
+        }
+
+        .info-left img {
+            width: 100px;
+            margin-right: 10px;
+        }
+
+        .buttons {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #botao_anunciar,
+        #denunciar {
+            width: 100%;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+ .TituloModal,
+        .titulo h1{
+            text-align: center; /* Centraliza os títulos do usuário */
+        }
+
+        .Avaliacao_rating {
+            text-align: center; /* Centraliza a avaliação média */
+  margin-bottom: 0px;
+        margin-left: 0px;
+        margin-top:20px;
+        }
+
+        .info-anuncio {
+            padding: 10px;
+        }
+
+        #map { /* Faz com que o mapa ocupe a largura total da tela */
+            height: 200px; /* Defina a altura desejada para o mapa em dispositivos móveis */
+        }
+ #denunciar {
+       margin-left: 0px;
+    }
+
+    }
+    ";
+}
+
+@section Style {
+<style>
+    .carousel-inner {
+    position: relative;
+    max-width: 100%;
+    overflow: hidden;
+}
+    .botaoClose {
+        align-items: end;
+        justify-content: center;
+    }
+
+    .modal-body ul {
+        align-items: start;
+        padding-left: 0px;
+    }
+
+    #Fechar {
+        color: #112647;
+        background-color: white;
+        border-color: #112647;
+        border-radius: 10px;
+        border-width: 2px;
+        border-style: solid;
+        padding: 10px;
+    }
+
+    #Fechar:hover {
+        color: white;
+        background-color: #112647;
+        border-color: white;
+        border-radius: 10px;
+        border-width: 2px;
+        border-style: solid;
+        padding: 10px;
+    }
+
+    #Guardar {
+        color: white;
+        background-color: #112647;
+        border-color: white;
+        border-radius: 10px;
+        border-width: 2px;
+        border-style: solid;
+        padding: 10px;
+    }
+
+    #Guardar:hover {
+        color: #112647;
+        background-color: white;
+        border-color: #112647;
+        border-radius: 10px;
+        border-width: 2px;
+        border-style: solid;
+        padding: 10px;
+    }
+
+    .voltar {
+        justify-content: center;
+        align-items: start;
+        color: white;
+        background-color: #112647;
+        border-color: white;
+        border-radius: 10px;
+        border-width: 2px;
+        border-style: solid;
+        padding: 10px;
+    }
+
+    .voltar:hover {
+        justify-content: center;
+        align-items: start;
+        color: #112647;
+        background-color: white;
+        border-color: #112647;
+        border-radius: 10px;
+        border-width: 2px;
+        border-style: solid;
+        padding: 10px;
+    }
+
+    .TituloModal {
+        justify-content: center;
+        align-items: center;
+    }
+
+    .a_lista_denuncia {
+        padding: 10px;
+        margin-bottom: 5px;
+        list-style: none;
+        text-align: left;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #112647;
+        border-radius: 10px;
+    }
+
+    .checked {
+        color: orange;
+    }
+
+    .Avaliacao_rating {
+        padding: 10px;
+        margin-top: 20px;
+        border-radius: 10px;
+        border-width: 1px;
+        border-style: solid;
+    }
+
+    .div_container,
+    .info-utilizador,
+    .descricao,
+    #Card_denunciar,
+    .info-anuncio,
+    .botoes_denunciar,
+    .Info-anuncio {
+        background-color: white;
+        box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+    
+            -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+        -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .info-left img {
+        width: 150px;
+        margin-right: 10px;
+    }
+
+    .info-right {
+        text-align: center;
+    }
+
+    .buttons {
+      
+        display: flex;
+        flex-direction: row;
+        gap: 10px; 
+        align-items: center;
+    }
+
+    #denunciar {
+        margin-left: 10px;
+    }
+
+    #botao_anunciar,
+    #denunciar {
+        color: white;
+        background-color: #112647;
+        border-color: white;
+        border-radius: 10px;
+        border-width: 2px;
+        border-style: solid;
+        text-decoration: none;
+        padding: 10px;
+    }
+
+    #botao_anunciar:hover,
+    #denunciar:hover {
+        color: #112647;
+        background-color: white;
+        border-color: #112647;
+        border-radius: 10px;
+        border-width: 2px;
+        border-style: solid;
+        text-decoration: none;
+        padding: 10px;
+    }
+
+    .carrossel {
+        margin-top: 60px;
+        margin-bottom: 60px;
+    }
+
+    .carousel-item img {
+        max-height: 700px;
+        max-width: 1100px;
+    }
+
+    #map {
+        height: 580px;
+    }
+  
+
+    @Html.Raw(mediaQuery)
+
+</style>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+
+}
+
+
+
+
+<div class="text-center">
+    <div>
+        <div class="info-utilizador">
+<div class="info-left">
+    @{
+        var user1 = await UserManager.GetUserAsync(User);
+        var userLogin = "";
+        if (user1 != null)
+        {
+            userLogin = user1.CC;
+        }
+        var userId = Model.UserId;
+        var user = await UserManager.FindByIdAsync(userId);
+        var UserCC = (await UserManager.FindByIdAsync(userId)).CC;
+        var profilePictureBytes = user?.ProfilePicture;
+        var profilePictureBase64 = Convert.ToBase64String(profilePictureBytes);
+        var profilePictureSrc = $"data:image/jpeg;base64,{profilePictureBase64}";
+        var UserAnunciosFavoritos = new List<Favoritos>();  
+
+        if (user1 != null)
+        {
+            UserAnunciosFavoritos = await ApplicationDbContext.Favoritos
+                .Where(m => m.Id_Anuncio == Model.Id_anuncio && m.CC == user1.CC)
+                .ToListAsync();
+        }
+    }
+    <img src="@profilePictureSrc" class="rounded-3" style="width: 150px;" alt="Avatar" />
+</div>
+
+            <div class="info-right">
+                <div class="titulo" style="text-align:center;"> <h1>@Html.DisplayFor(modelItem => modelItem.User.Nome)</h1></div>
+                @{
+                   
+                    ViewBag.anunciadorNome = @Html.DisplayFor(modelItem => modelItem.User.Nome);
+                    int primeiramensagem = 1;
+                }
+               <div class="buttons" style="display: flex; gap: 10px;">
+    <a asp-action="Index" asp-controller="Mensagens" asp-route-primeiramensagem="@primeiramensagem" asp-route-idDestinatario="@userId" id="botao_anunciar" style="flex: 1;">Enviar Mensagem</a>
+
+<!-- No final da sua View -->
+<a asp-action="VerAnunciosPublicados" asp-controller="PropostasDeCompras" asp-route-userId="@userId" id="botao_anunciar" style="flex: 1;">Ver anúncios publicados</a>
+<form asp-action="Create" asp-controller="Favoritos" style="flex: 0 0 20%;">
+        <input type="hidden" id="Id_Anuncio" name="Id_Anuncio" value="@Html.DisplayFor(modelItem => modelItem.Id_anuncio)">
+        <button type="submit" id="botao_anunciar" style="width: 100%;">
+
+          @if(UserAnunciosFavoritos.Count > 0)
+                            {
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-heart-fill" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
+</svg>
+                            }
+                            else
+                            {
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.920 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                            </svg>
+                            }
+        </button>
+    </form>
+</div>
+
+            </div>
+            <div class="Avaliacao_rating">
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+                <h5 id="titulo_avaliacao">Avaliação Média: @Html.DisplayFor(modelItem => modelItem.User.Avaliacao)/5</h5>
+
+                @{
+                    Decimal avaliacaoMedia = Convert.ToDecimal(user?.Avaliacao);
+                }
+                @for (int i = 1; i <= 5; i++)
+                {
+                <span class="fa @(i <= Math.Ceiling(avaliacaoMedia) ? "fa-star checked" : "fa-star")"></span>
+                }
+
+
+            </div>
+        </div>
+
+        <input type="hidden" value="@Html.DisplayFor(modelItem => modelItem.coordenadas)">
+        <div class="Info-anuncio">
+            <div>  <h1>@Html.DisplayFor(modelItem => modelItem.Titulo)</h1></div>
+
+           
+            <div class="carrossel">
+                <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel" data-interval="0">
+                    <div class="carousel-inner">
+
+                        @{
+                            var AnuncioId = Model.Id_anuncio;
+                            var ImagensAnuncio = await ApplicationDbContext.Imagens_Anuncios.Where(m => m.Id_Anuncio == AnuncioId).ToListAsync();
+                        }
+
+                        @if (ImagensAnuncio.Any())
+                        {
+                            var isFirstImage = true;
+                            var itemCounter = 0; 
+                            foreach (var imagemAnuncio in ImagensAnuncio)
+                            {
+                                <div id="carousel-item @(itemCounter)" class="carousel-item @(isFirstImage ? "active" : "")">
+                                    <img src="@ImageHelper.GetImageLink(imagemAnuncio.Imagem, isFirstImage ? "AnunciosEnviado" : "Anuncios")" class="d-block w-100" style="border-radius: 10px;" alt="Imagem do Anúncio" asp-append-version="true">
+                                </div>
+                                isFirstImage = false;
+                                itemCounter++;
+                            }
+                        }
+                        else
+                        {
+                            <div class="carousel-item active">
+                                <img src="/Imagens/no-image.png" class="d-block w-100" style="border-radius:10px;" alt="Imagem Padrão">
+                            </div>
+                        }
+                      
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+               
+            </div>
+
+
+
+
+            <div>  <h1>@Html.DisplayFor(modelItem => modelItem.Preco)€</h1></div>
+
+        </div>
+        <div class="descricao">
+            <h5>Descrição</h5>
+            <p>@Html.DisplayFor(modelItem => modelItem.descricao)</p>
+        </div>
+        <input type="hidden" id="cordenadasInput"value="@Html.DisplayFor(modelItem => modelItem.coordenadas)">
+        <div class="descricao">
+            <h5>Localização</h5>
+            <p></p>
+            <div id="map" class="col-md" ></div>
+
+        </div>
+
+
+        <div class="info-utilizador">
+            <div class="info-left">
+
+               
+
+                <img src="@profilePictureSrc" class="rounded-3" style="width: 150px;" alt="Avatar" />
+            </div>
+            <div class="info-right">
+                <div class="titulo" style="text-align:center;"> <h1>@Html.DisplayFor(modelItem => modelItem.User.Nome)</h1></div>
+          <div class="buttons" style="display: flex; gap: 10px;">
+    <a asp-action="Index" asp-controller="Mensagens" asp-route-primeiramensagem="@primeiramensagem" asp-route-idDestinatario="@userId" id="botao_anunciar" style="flex: 1;">Enviar Mensagem</a>
+
+<a asp-action="VerAnunciosPublicados" asp-controller="PropostasDeCompras" asp-route-userId="@userId" id="botao_anunciar" style="flex: 1;">Ver anúncios publicados</a>
+  <form asp-action="Create" asp-controller="Favoritos" style="flex: 0 0 20%;">
+        <input type="hidden" id="Id_Anuncio" name="Id_Anuncio" value="@Html.DisplayFor(modelItem => modelItem.Id_anuncio)">
+        <button type="submit" id="botao_anunciar" style="width: 100%;">
+           @if(UserAnunciosFavoritos.Count > 0)
+                            {
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-heart-fill" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
+</svg>
+                            }
+                            else
+                            {
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.920 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                            </svg>
+                            }
+        </button>
+    </form>
+</div>
+
+            </div>
+        </div>
+        @if (user1 != null && user1.CC != UserCC )
+        {
+            
+       
+        <div id="Card_denunciar" class="botoes_denunciar">
+
+            <button type="button" class="btn btn-primary" id="denunciar" data-toggle="modal" data-target="#exampleModalDenuncia" >
+                Denunciar anúncio
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-flag-fill" viewBox="0 0 16 16">
+                    <path d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12.435 12.435 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A19.626 19.626 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a19.587 19.587 0 0 0 1.349-.476l.019-.007.004-.002h.001" />
+                </svg>
+            </button>
+
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalProposta">
+                    Enviar Proposta
+                </button>
+        </div>
+         
+
+            <!-- Modal ProPosta -->
+            <div class="modal fade" id="exampleModalProposta" tabindex="-1" role="dialog" aria-labelledby="exampleModalPropostaTitle" aria-hidden="true">
+                <!-- ... (seu conteúdo do modal de proposta) -->
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLongTitle">Enviar Proposta</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <label for="precoInput">Preço:</label>
+                            <input type="text" id="precoInput" class="form-control">  
+                            <small class="form-text text-muted">O valor deve estar entre 75% e 100% do valor do produto.</small>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                            <form asp-action="Create" asp-controller="PropostasDeCompras">
+                                <input type="hidden" name="Id_Anuncio" value="@AnuncioId">
+                                <input type="hidden" name="CC_vendedor" value="@UserCC">
+                                <input type="hidden" name="CC_comprador" value="@userLogin">
+                                <input type="hidden" id="Preco_proposta" name="Preco_proposta">
+                                <button type="submit" class="btn btn-primary" onclick="Bucarpreco()" id="enviarButton">Enviar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <!-- Modal Denuncia -->
+            <div class="modal fade" id="exampleModalDenuncia" tabindex="-1" role="dialog" aria-labelledby="exampleModalDenunciaTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="botaoVoltar">
+                            <button onclick="selecionarOpcao('voltar')" type="button" class="voltar" id="voltar" aria-label="voltar" style="display:none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="TituloModal">
+                            <h5 class="modal-title" id="tituloModal">Opções de denúncias</h5>
+                        </div>
+                        <div class="botaoClose">
+                            <button type="button" onclick="selecionarOpcao('Fechar')" class="close" id="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div id="menu">
+                            <ul id="menuOpcoes">
+                                <li onclick="selecionarOpcao('Dados do vendedor errados')" class="a_lista_denuncia">
+                                    <a onclick="selecionarOpcao('Dados do vendedor errados')">Dados do vendedor errados</a>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                    </svg>
+                                </li>
+                                <li onclick="selecionarOpcao('Problemas com o artigo/serviço')" class="a_lista_denuncia">
+                                    <a onclick="selecionarOpcao('Problemas com o artigo/serviço')">Problemas com o artigo/serviço</a>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                    </svg>
+                                </li>
+                                <li onclick="selecionarOpcao('Fraude')" class="a_lista_denuncia">
+                                    <a onclick="selecionarOpcao('Fraude')">Fraude</a>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                    </svg>
+                                </li>
+                                <li onclick="selecionarOpcao('Abuso, discriminação, nudez')" class="a_lista_denuncia">
+                                    <a onclick="selecionarOpcao('Abuso, discriminação, nudez')">Abuso, discriminação, nudez</a>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                    </svg>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div id="submenu" style="display: none;">
+
+                            <div id="DadosVendedorErrado" style="display: none;">
+                                <ul>
+                                    <li class="a_lista_denuncia" onclick="selecionarOpcaoSUB('Contacto errado')">
+                                        <a onclick="selecionarOpcaoSUB('Contacto errado')">Contacto errado</a>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                        </svg>
+                                    </li>
+                                    <li class="a_lista_denuncia" onclick="selecionarOpcaoSUB('Profissional a apresentar-se como particular')">
+                                        <a onclick="selecionarOpcaoSUB('Profissional a apresentar-se como particular')">Profissional a apresentar-se como particular </a>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                        </svg>
+                                    </li>
+
+                                </ul>
+                            </div>
+                            <div id="ProblemaArtigoServico" style="display: none;">
+                                <ul>
+                                    <li class="a_lista_denuncia" onclick="selecionarOpcaoSUB('Artigo ou serviço proibido')">
+                                        <a onclick="selecionarOpcaoSUB('Artigo ou serviço proibido')">Artigo ou serviço proibido</a>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                        </svg>
+                                    </li>
+                                    <li class="a_lista_denuncia" onclick="selecionarOpcaoSUB('Artigo Contrafeito')">
+                                        <a onclick="selecionarOpcaoSUB('Artigo Contrafeito')">Artigo contrafeito</a>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                        </svg>
+                                    </li>
+                                    <li class="a_lista_denuncia" onclick="selecionarOpcaoSUB('Venda Ilegal de Animais')">
+                                        <a onclick="selecionarOpcaoSUB('Venda Ilegal de Animais')">Venda ilegal de animais</a>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                        </svg>
+                                    </li>
+
+
+                                </ul>
+                            </div>
+                            <div id="Fraude" style="display: none;">
+                                <ul>
+                                    <li class="a_lista_denuncia" onclick="selecionarOpcaoSUB('Fui vitima de Fraude')">
+                                        <a onclick="selecionarOpcaoSUB('Fui vitima de Fraude')">Fui vitima de fraude</a>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                        </svg>
+                                    </li>
+                                    <li class="a_lista_denuncia" onclick="selecionarOpcaoSUB('Suspeito de Fraude')">
+                                        <a onclick="selecionarOpcaoSUB('Suspeito de Fraude')">Suspeito de Fraude</a>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                        </svg>
+                                    </li>
+
+                                </ul>
+                            </div>
+                            <div id="AbusoDescriminicaoNudez" style="display: none;">
+                                <ul>
+                                    <li class="a_lista_denuncia" onclick="selecionarOpcaoSUB('Discurso de ódio')">
+                                        <a onclick="selecionarOpcaoSUB('Discurso de ódio')">Discurso de ódio</a>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                        </svg>
+                                    </li>
+                                    <li class="a_lista_denuncia" onclick="selecionarOpcaoSUB('Descriminição')">
+                                        <a onclick="selecionarOpcaoSUB('Descriminição')">Descriminição</a>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                        </svg>
+                                    </li>
+                                    <li class="a_lista_denuncia" onclick="selecionarOpcaoSUB('Conteúdo sexual')">
+                                        <a onclick="selecionarOpcaoSUB('Conteúdo sexual')">Conteúdo sexual</a>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                        </svg>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" onclick="selecionarOpcao('Fechar')" id="Fechar" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                        <form asp-action="Create" asp-controller="Denuncias" method="post">
+                            <input id="AnuncioId" name="Id_Anuncio" asp-for="Denuncia.Id_Anuncio" type="hidden" value="@AnuncioId">
+                            <input id="userCC" name="CC_denunciador" asp-for="Denuncia.CC_denunciador" type="hidden" value="@userLogin">
+                            <input id="userCCLogin" name="CC_anunciador" asp-for="Denuncia.CC_anunciador" type="hidden" value="@UserCC">
+                            <input id="tipo" name="Tipo" asp-for="Denuncia.Tipo" type="hidden">
+                            <input id="Subtipo" name="SubTipo" asp-for="Denuncia.SubTipo" type="hidden">
+                            <button type="submit" onclick="selecionarOpcao('Guardar')" id="Guardar" class="btn btn-primary">Denunciar</button>
+                      
+                    </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        }
+</div>
+</div>
+@section Scripts {
+    @{
+        if(user1 != null)
+        {
+            <script>
+      var precoProp = "";
+            function Bucarpreco() {
+                precoProp = parseInt(document.getElementById("precoInput").value, 10);
+
+            
+               document.getElementById("Preco_proposta").value = document.getElementById("precoInput").value;
+            }
+ 
+   var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+connection.start().then(function () {
+    console.log("Connected!");
+}).catch(function (err) {
+    console.error(err.toString());
+});
+
+$("#enviarButton").click(function () {
+    var receiverUserId = '@user1.CC'; // Use single quotes to surround the C# variable
+     // Assuming precoProp is a C# variable, and you want to pass its value
+    var message = "O utilizador " + '@user1.Nome' + " enviou uma proposta com um valor de " + precoProp; // Use single quotes to surround the C# variable
+
+    connection.invoke("SendProposal", receiverUserId, message).catch(function (err) {
+        console.error(err.toString());
+    });
+});
+
+connection.on("ReceiveProposalNotification", function (userId, message) {
+    // Logic to display the notification to the user
+    console.log("Nova proposta recebida: " + message);
+    // Example: display notification using a library like Toastr
+    toastr.info(message);
+});
+
+
+
+
+  </script>
+        }
+    }
+  
+
+
+    <script>
+
+        var opcaoSelecionada = '';
+        var opcaoSelecionadaSub = '';
+        var opcaoSelecionadaFinal = '';
+
+        function selecionarOpcao(opcao) {
+            opcaoSelecionada = opcao;
+            if (opcaoSelecionada === "Guardar" || opcaoSelecionada === "voltar" || opcaoSelecionada === "Fechar" || opcaoSelecionada === "close") {
+
+            }
+            else{
+                opcaoSelecionadaFinal = opcaoSelecionada;
+                mostrarTipo(opcaoSelecionadaFinal);
+            }
+            var DivMenu = document.getElementById("menu");
+            var DivSubMenu = document.getElementById("submenu");
+            var DivDadosVendedorErrado = document.getElementById("DadosVendedorErrado");
+            var DivProblemaArtigoServico = document.getElementById("ProblemaArtigoServico");
+            var DivFraude = document.getElementById("Fraude");
+            var DivAbusoDescriminicaoNudez = document.getElementById("AbusoDescriminicaoNudez");
+            var ButtonVoltar = document.getElementById("voltar");
+            var Titulo_Modal = document.getElementById("tituloModal");
+            var BotãoFechar = document.getElementById("Fechar");
+
+            if (opcaoSelecionada === "Dados do vendedor errados") {
+                Titulo_Modal.innerText = "Dados do vendedor errados";
+                DivMenu.style.display = "none";
+                DivSubMenu.style.display = "block";
+                DivDadosVendedorErrado.style.display = "block";
+                DivProblemaArtigoServico.style.display = "none";
+                DivFraude.style.display = "none";
+                DivAbusoDescriminicaoNudez.style.display = "none";
+                ButtonVoltar.style.display = "block";
+            } else if (opcaoSelecionada === "Problemas com o artigo/serviço") {
+                Titulo_Modal.innerText = "Problemas com o artigo/serviço";
+                DivMenu.style.display = "none";
+                DivSubMenu.style.display = "block";
+                DivDadosVendedorErrado.style.display = "none";
+                DivProblemaArtigoServico.style.display = "block";
+                DivFraude.style.display = "none";
+                DivAbusoDescriminicaoNudez.style.display = "none";
+                ButtonVoltar.style.display = "block";
+            } else if (opcaoSelecionada === "Fraude") {
+                Titulo_Modal.innerText = "Fraude";
+                DivMenu.style.display = "none";
+                DivSubMenu.style.display = "block";
+                DivDadosVendedorErrado.style.display = "none";
+                DivProblemaArtigoServico.style.display = "none";
+                DivFraude.style.display = "block";
+                DivAbusoDescriminicaoNudez.style.display = "none";
+                ButtonVoltar.style.display = "block";
+            } else if (opcaoSelecionada === "Abuso, discriminação, nudez") {
+
+                Titulo_Modal.innerText = "Abuso, discriminação, nudez";
+                DivMenu.style.display = "none";
+                DivSubMenu.style.display = "block";
+                DivDadosVendedorErrado.style.display = "none";
+                DivProblemaArtigoServico.style.display = "none";
+                DivFraude.style.display = "none";
+                DivAbusoDescriminicaoNudez.style.display = "block";
+                ButtonVoltar.style.display = "block";
+            }
+            else if (opcaoSelecionada === "voltar") {
+                Titulo_Modal.innerText = "Opções de denúncias";
+                ButtonVoltar.style.display = "none";
+                DivMenu.style.display = "block";
+                DivSubMenu.style.display = "none";
+                DivDadosVendedorErrado.style.display = "none";
+                DivProblemaArtigoServico.style.display = "none";
+                DivFraude.style.display = "none";
+                DivAbusoDescriminicaoNudez.style.display = "none";
+                opcaoSelecionadaSub = "";
+            }
+            else if (opcaoSelecionada === "Fechar" || opcaoSelecionada === "close") {
+                Titulo_Modal.innerText = "Opções de denúncias";
+                ButtonVoltar.style.display = "none";
+                DivMenu.style.display = "block";
+                DivSubMenu.style.display = "none";
+                DivDadosVendedorErrado.style.display = "none";
+                DivProblemaArtigoServico.style.display = "none";
+                DivFraude.style.display = "none";
+                DivAbusoDescriminicaoNudez.style.display = "none";
+                opcaoSelecionada = "";
+                opcaoSelecionadaSub = "";
+            }
+            else if (opcaoSelecionada === "Guardar") {
+                Titulo_Modal.innerText = "Opções de denúncias";
+                ButtonVoltar.style.display = "none";
+                DivMenu.style.display = "block";
+                DivSubMenu.style.display = "none";
+                DivDadosVendedorErrado.style.display = "none";
+                DivProblemaArtigoServico.style.display = "none";
+                DivFraude.style.display = "none";
+                DivAbusoDescriminicaoNudez.style.display = "none";
+                document.getElementById("tipo").value = opcaoSelecionadaFinal;
+                opcaoSelecionada = "";
+
+            }
+
+   
+
+
+        }
+
+        function selecionarOpcaoSUB(opcao) {
+            opcaoSelecionadaSub = opcao;
+            document.getElementById("Subtipo").value = opcaoSelecionadaSub;
+            mostrarTipoESubtipo(document.getElementById("Subtipo").value);
+                }
+
+        function mostrarTipo(tipo) {
+      
+            $.ajax({
+                url: '/Anuncios/MostrarTipo',
+                type: 'GET',
+                data: { Tipo: tipo },
+                success: function (data) {
+                    toastr.info(data.mensagem);
+                },
+                error: function () {
+                }
+            });
+        }
+        function mostrarTipoESubtipo(Subtipo) {
+          
+            $.ajax({
+                url: '/Anuncios/MostrarTipoESubTipo',
+                type: 'GET',
+                data: { Subtipo: Subtipo },
+                success: function (data) {
+                    toastr.info(data.mensagem);
+                },
+                error: function () {
+                }
+            });
+        }
+    </script>
+    <script>
+        var map = L.map('map').setView([39.5, -8], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+   
+
+        function adicionarMarcador(lat, lon, nomeLocalizacao) {
+            if (isNaN(lat) || isNaN(lon)) {
+                
+                return;
+            }
+
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            L.marker([lat, lon]).addTo(map);
+
+            map.setView([lat, lon], 14);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var coordenadasInput = document.getElementById("cordenadasInput").value;
+            carregarLocalizacao(coordenadasInput);
+        });
+
+        function carregarLocalizacao(coordenadas) {
+            var coordenadasArray = coordenadas.split(',');
+
+            if (coordenadasArray.length !== 2) {
+
+                return;
+            }
+
+            var lat = parseFloat(coordenadasArray[0]);
+            var lon = parseFloat(coordenadasArray[1]);
+
+            if (isNaN(lat) || isNaN(lon)) {
+                return;
+            }
+
+            adicionarMarcador(lat, lon, "Nome do Local");
+        }
+
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var coordenadasInput = document.querySelector('input[type="hidden"]').value;
+            carregarLocalizacao(coordenadasInput);
+        });
+    </script>
+        
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+}
+
+
+
+
+
+

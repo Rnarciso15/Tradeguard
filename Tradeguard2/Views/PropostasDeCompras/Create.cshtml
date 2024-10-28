@@ -1,0 +1,44 @@
+﻿@model Tradeguard2.Models.PropostasDeCompra
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>PropostasDeCompra</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Id_Anuncio" class="control-label"></label>
+                <input asp-for="Id_Anuncio" class="form-control" />
+                <span asp-validation-for="Id_Anuncio" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CC_vendedor" class="control-label"></label>
+                <input asp-for="CC_vendedor" class="form-control" />
+                <span asp-validation-for="CC_vendedor" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CC_comprador" class="control-label"></label>
+                <input asp-for="CC_comprador" class="form-control" />
+                <span asp-validation-for="CC_comprador" class="text-danger"></span>
+            </div>
+           
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

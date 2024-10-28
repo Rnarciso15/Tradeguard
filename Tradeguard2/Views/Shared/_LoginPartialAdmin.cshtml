@@ -1,0 +1,61 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+    
+        var user = UserManager.GetUserAsync(User).Result;
+
+        <li  class="nav-item" style="display: flex;align-items: center;gap: 10px;">
+            <img src="@(GetUserAvatarUrl())" alt="User Avatar" class="user-avatar">
+
+            <a id="Item_conjunto" style="margin-left: 0px;" class="nav-link text-white" asp-action="DetailsUser" asp-controller="User">Olá @user.Nome!</a>
+        </li>
+
+        <li id="Item_conjunto" style="margin-left: 0px;" class="nav-item">
+            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })">
+                <button type="submit" class="nav-link btn btn-link text-white">Terminar sessão</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li id="Item_conjunto" style="margin-left: 10px;" class="nav-item">
+            <button class="anunciar_vender anunciar-vender-button">
+                <a class="nav-link active" asp-area="Identity" asp-page="/Account/Login">
+                    Iniciar Sessão
+                </a>
+            </button>
+        </li>
+    }
+</ul>
+
+@functions {
+    public string GetUserAvatarUrl()
+    {
+        var user = UserManager.GetUserAsync(User).Result;
+        if (user != null && user.ProfilePicture != null && user.ProfilePicture.Length > 0)
+        {
+           
+            var base64String = Convert.ToBase64String(user.ProfilePicture);
+            return $"data:image/jpeg;base64,{base64String}";
+        }
+      
+        return "/path/to/default/avatar.png";
+    }
+
+}
+
+<style>
+    .user-avatar {
+        width: 40px; /* Tamanho da imagem de perfil */
+        height: 40px;
+        border-radius: 50%; /* Bordas arredondadas para uma aparência de círculo */
+        margin-left: 10px; /* Espaçamento entre o texto e a imagem */
+    }
+</style>

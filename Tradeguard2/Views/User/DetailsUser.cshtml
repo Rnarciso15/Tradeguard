@@ -1,0 +1,399 @@
+﻿@model ApplicationUser
+@{
+    ViewData["Title"] = "Details User";
+    var mediaQuery = @"
+        @media only screen and  (max-width: 768px) {
+            #organizar_botoes {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 10px;
+        }
+
+#div_geral {
+    background-color: white;
+    box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+    -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+    -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+    border-radius: 10px;
+    padding: 30px;
+    padding-left: 50px;
+    padding-right: 50px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+        }
+    ";
+
+      
+}
+@section Style {
+    <style>
+        .button_Visualizar:hover, .button_Editar:hover{
+            background-color: #112647;
+            border-color:  #112647;
+            color:white;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+        }
+        .button_Visualizar, .button_Editar {
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+        }
+
+            .button_Visualizar a, .button_Editar a {
+                color: #112647;
+            }
+
+        .button_cancelar {
+            background-color: white;
+            border-color: red;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+            .button_cancelar:hover {
+                color: white;
+                background-color: red;
+                border-radius: 10px;
+                border-width: 2px;
+                border-style: solid;
+                padding: 10px;
+                display: inline-block;
+                margin-right: 10px;
+            }
+
+        .button_guardar:hover {
+            color: white;
+            background-color: forestgreen;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .button_guardar {
+            background-color: white;
+            border-color: forestgreen;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .organizar_botoes {
+            display: flex;
+            flex-direction: row;
+            gap:10px;
+        }
+
+        #div_geral {
+            background-color: white;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+       -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 50px;
+            padding-left: 100px;
+            padding-right: 100px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .div_form {
+            margin-top: 20px;
+        }
+
+        .avatar_img {
+            margin-bottom: 20px;
+        }
+
+        .checked {
+            color: orange;
+        }
+
+        .Avaliacao_rating {
+            margin-bottom: 20px;
+        }
+
+        .carregar_Foto a {
+            color: #112647;
+        }
+
+        .carregar_Foto {
+            margin-bottom: 20px;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+  @Html.Raw(mediaQuery)    
+    </style>
+}
+
+
+
+
+<div id="div_geral" method="Post" class="text-center">
+
+
+    <h1>Dados Pessoais</h1>
+   
+    <div id="organizar_botoes" class="container">
+
+    
+             <button id="btnEditar" class="button_Editar" name="TipoDeAcao" value="Editar">
+                   Editar Perfil
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                </svg>
+            </button>
+       
+
+      
+               <button id="btnVisualizar" class="button_Visualizar" name="TipoDeAcao" value="Visualizar">
+                     Visualizar Perfil
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.830 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z" />
+                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z" />
+                </svg>
+            </button>
+      
+    </div>
+    <form asp-action="EditUser" enctype="multipart/form-data">
+    <div class="div_form">
+        <div class="avatar_img">
+                @{
+                    string base64Image = Convert.ToBase64String(Model.ProfilePicture);
+                    string imgSrc = string.Format("data:image/png;base64,{0}", base64Image);
+                }
+                <img id="profilePicture" src="@imgSrc" class="rounded-3" style="width: 150px;" alt="Avatar" />
+            </div>
+
+        <div class="Avaliacao_rating">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+            <h5 id="titulo_avaliacao" >Avaliação Média: @Model.Avaliacao/5</h5>
+
+            @{
+                Decimal avaliacaoMedia = Convert.ToDecimal(Model.Avaliacao);
+            }
+            @for (int i = 1; i <= 5; i++)
+            {
+                <span class="fa @(i <= Math.Ceiling(avaliacaoMedia) ? "fa-star checked" : "fa-star")"></span>
+            }
+
+           
+
+
+        </div>
+
+        
+            <div style="    display: flex;
+                            text-align: center;
+                            align-items: center;
+                            justify-content: center;
+                            margin-bottom: 10px;">
+                <a id="alterarSenha"  asp-controller="User" asp-action="ForgotPassword">
+                    Alterar Senha
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock" viewBox="0 0 16 16">
+                        <path d="M8 1a3 3 0 0 1 3 3v2h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1V4a3 3 0 0 1 3-3zm1 5h-2V4a1 1 0 0 1 1-1 1 1 0 0 1 1 1v2zm2 3H5v5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9z"/>
+                    </svg>
+                </a>
+            </div>
+
+        <div class="form-group" style="text-align:left;">
+            <label asp-for="CC"></label>
+         <input id="CC1" value="@Model.CC" asp-for="CC" class="form-control" autocomplete="off" maxlength="15" />
+<span asp-validation-for="CC" class="text-danger" placeholder="00000000 0 AA 0"></span>
+
+        </div>
+
+        <div class="form-group" style="text-align:left;">
+            <label asp-for="Email"></label>
+            <input id="Email1" value="@Model.Email" asp-for="Email" class="form-control" autocomplete="off" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-group" style="text-align:left;">
+            <label asp-for="Nome"></label>
+            <input id="Nome1" value="@Model.Nome" asp-for="Nome" class="form-control" autocomplete="off" />
+            <span asp-validation-for="Nome" class="text-danger"></span>
+        </div>
+
+        <div class="form-group" style="text-align:left;">
+            <label asp-for="Telemovel"></label>
+            <input id="Telemovel1"value="@Model.Telemovel" asp-for="Telemovel" class="form-control" autocomplete="off"oninput="formatarTelefone(this)" maxlength="11"/>
+            <span asp-validation-for="Telemovel" class="text-danger"></span>
+        </div>       
+
+
+        <div id="organizar_botoes" style="margin-top: 20px;">
+
+            
+                <button type="button"  id="btnCancelar"class="button_cancelar">
+                    Cancelar
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                    </svg>
+                </button>
+
+
+            
+                <button class="button_guardar" type="submit" id="btnGuardar">
+                    Guardar
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
+                        <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5v-13Z" />
+                        <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5V16Zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V0ZM9 1h2v4H9V1Z" />
+                    </svg>
+                </button>
+              <input type="hidden" id="Nome" name="Nome">
+                <input type="hidden" id="CC" name="CC">
+              <input type="hidden" id="Telemovel" name="Telemovel">
+                <input type="hidden" id="Email" name="Email">
+        </div>
+
+          </form>
+    </div>
+   
+
+
+
+
+
+@section Scripts {
+  
+<script>
+    function formatarTelefone(input) {
+        // Remove todos os caracteres que não são números do valor atual
+        var valor = input.value.replace(/\D/g, '');
+
+        // Adiciona espaços conforme o padrão especificado
+        var novoValor = '';
+        for (var i = 0; i < valor.length; i++) {
+            if (i === 3 || i === 6) {
+                novoValor += ' ';
+            }
+            novoValor += valor[i];
+        }
+
+        // Define o valor formatado no campo de entrada
+        input.value = novoValor;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+            disableInputs();
+            hideButtons();
+
+            document.getElementById("btnVisualizar").addEventListener("click", function () {
+                disableInputs();
+                hideButtons();
+            });
+
+            document.getElementById("btnEditar").addEventListener("click", function () {
+                enableInputs();
+                showButtons();
+            });
+
+            document.getElementById("btnCancelar").addEventListener("click", function () {
+                disableInputs();
+                hideButtons();
+            });
+
+            document.getElementById("btnGuardar").addEventListener("click", function () {
+                disableInputs();
+                hideButtons();
+                var nomeValue = document.getElementById("Nome1").value;
+                var ccValue = document.getElementById("CC1").value;
+                var telemovelValue = document.getElementById("Telemovel1").value;
+                var emailValue = document.getElementById("Email1").value;
+
+                // Atribuir valores aos últimos 4 inputs
+                document.getElementById("Nome").value = nomeValue;
+                document.getElementById("CC").value = ccValue;
+                document.getElementById("Telemovel").value = telemovelValue;
+                document.getElementById("Email").value = emailValue;
+
+                // Realize as ações necessárias para salvar os dados
+            });
+
+            var telemovelInput = document.getElementById("Telemovel1");
+            telemovelInput.addEventListener("input", function () {
+                formatarTelefone(telemovelInput);
+            });
+
+            var nomeValue = document.getElementById("Nome1").value;
+            var ccValue = document.getElementById("CC1").value;
+            var telemovelValue = document.getElementById("Telemovel1").value;
+            var emailValue = document.getElementById("Email1").value;
+
+            // Atribuir valores aos últimos 4 inputs
+            document.getElementById("Nome").value = nomeValue;
+            document.getElementById("CC").value = ccValue;
+            document.getElementById("Telemovel").value = telemovelValue;
+            document.getElementById("Email").value = emailValue;
+        });
+
+        function disableInputs() {
+            var inputs = document.querySelectorAll("input[type='text'], input[type='file']");
+            inputs.forEach(function (input) {
+                input.disabled = true;
+            });
+            // Manter Email e CC desativados
+            document.getElementById("Email1").disabled = true;
+            document.getElementById("CC1").disabled = true;
+        }
+
+        function enableInputs() {
+            var inputs = document.querySelectorAll("input[type='text'], input[type='file']");
+            inputs.forEach(function (input) {
+                input.disabled = false;
+            });
+            // Manter Email e CC desativados
+            document.getElementById("Email1").disabled = true;
+            document.getElementById("CC1").disabled = true;
+        }
+
+        function hideButtons() {
+            var buttons = document.querySelectorAll(".button_guardar, .button_cancelar");
+            buttons.forEach(function (button) {
+                button.style.display = "none";
+            });
+        }
+
+        function showButtons() {
+            var buttons = document.querySelectorAll(".button_guardar, .button_cancelar");
+            buttons.forEach(function (button) {
+                button.style.display = "inline-block";
+            });
+        }
+    </script>
+}
+
+

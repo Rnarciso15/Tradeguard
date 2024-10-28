@@ -1,0 +1,317 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@model Tradeguard2.Models.Avaliacao
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+@{
+    ViewData["Title"] = "Avaliar";
+    var mediaQueryAnuncios = @"
+        @media screen and (max-width: 960px) {
+            .cardProposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                flex-direction: column;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .imgProposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                max-width: 100%;
+                border-radius: 10px 10px 0 0;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .card-info-proposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                padding: 10px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            #tituloProposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                font-size: 20px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            #precoProposta {
+                /* Estilos específicos para a seção de anúncios publicados */
+                font-size: 15px;
+                font-weight: bold;
+                margin-bottom: 0px;
+                margin-left: 0px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+          
+
+       
+        }
+    ";
+
+    var mediaQueryPropostas = @"
+        @media screen and (max-width: 600px) {
+            .cardProposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                flex-direction: column;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .imgProposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                max-width: 100%;
+                border-radius: 10px 10px 0 0;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            .card-info-proposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                padding: 10px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            #tituloProposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                font-size: 20px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+            #precoProposta {
+                /* Estilos específicos para a seção de propostas de aceite */
+                font-size: 15px;
+                font-weight: bold;
+                margin-bottom: 0px;
+                margin-left: 0px;
+                /* Adicione outros estilos conforme necessário */
+            }
+
+           
+        }
+    ";
+}
+@section Style {
+    <style>
+         .imgProposta {
+            flex: 1;
+            max-width: 300px;
+            border-radius: 10px 0 0 10px;
+        }
+
+        .imgProposta img {
+            width: 100%;
+            border-radius: 10px;
+            height: auto;
+        }
+
+        .card-info-proposta {
+            flex: 2;
+            padding: 20px;
+        }
+
+        #tituloProposta {
+            font-size: 24px;
+            font-weight: bold;
+            align-items: start;
+        }
+
+        #precoProposta {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 0px;
+            margin-left: 5px;
+        }
+        .card{
+            background-color: white;
+            transition: transform 0.2s;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        .checked {
+            color: orange;
+        }
+
+        .arrumar_estrelas {
+                  display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        justify-content: center;
+        }
+        .estrelas{
+                display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+        }
+        .fa-star {
+            font-size: 24px;
+        }
+
+        #aceitar {
+            color: white;
+            background-color: #1d8412;
+            border-style: solid;
+            border-width: 1px;
+            border-radius: 10px;
+        }
+
+            #aceitar:hover {
+                color: #1d8412;
+                border-color: #1d8412;
+                background-color: white;
+                border-style: solid;
+                border-width: 1px;
+                border-radius: 10px;
+            }
+
+        .cardProposta {
+            display: flex;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            width: 100%;
+            background-color: white;
+            transition: transform 0.2s;
+            -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+           @Html.Raw(mediaQueryAnuncios)
+        @Html.Raw(mediaQueryPropostas)
+    </style>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+}
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+@{
+    var user = await UserManager.GetUserAsync(User);
+    List<Tradeguard2.Models.PropostasDeCompra> userTemAvaliacao = null;
+    if (user != null)
+    {
+        userTemAvaliacao = await ApplicationDbContext.PropostasDeCompra
+            .Where(p => p.CC_comprador == user.CC && !p.Vendedor_Avaliado)
+            .ToListAsync();
+    }
+}
+
+@if (userTemAvaliacao != null && userTemAvaliacao.Any())
+{
+    @foreach (var item in userTemAvaliacao)
+    {
+        var user1 = await ApplicationDbContext.Users
+            .FirstOrDefaultAsync(p => p.CC == item.CC_vendedor);
+        <div class="cardProposta">
+            <div class="imgProposta">
+                <img class="card-img-top" src="@(await GetUserAvatarUrlAsync(user1.Id))" alt="Imagem do Anúncio" asp-append-version="true" />
+            </div>
+            <div class="card-info-proposta">
+                <p id="tituloProposta">@user1.Nome</p>
+                <p id="Email">@user1.Email</p>
+
+                @{
+                    decimal avaliacao = Convert.ToDecimal(user1.Avaliacao);
+                        for (int i = 1; i <= 5; i++)
+                        {
+                            <span class="fa @(i <= Math.Ceiling(avaliacao) ? "fa-star checked" : "fa-star")"></span>
+                        }
+                    
+                }
+            </div>
+        </div>
+    }
+}
+
+<div class="card"> 
+    
+    <div class="arrumar_estrelas">
+       
+    <div class="estrelas"> 
+        @for (int i = 1; i <= 5; i++)
+        {
+            <span id="estrela_@i" class="fa fa-star"></span>
+        }
+    </div>
+    
+       
+        <button type="submit" id="aceitar" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalProposta">
+            Enviar Avaliação
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-flag-fill" viewBox="0 0 16 16">
+                <path d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12.435 12.435 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A19.626 19.626 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a19.587 19.587 0 0 0 1.349-.476l.019-.007.004-.002h.001" />
+            </svg>
+        </button>
+
+
+
+        <div class="modal fade" id="exampleModalProposta" tabindex="-1" role="dialog" aria-labelledby="exampleModalPropostaTitle" aria-hidden="true">
+            <!-- ... (seu conteúdo do modal de proposta) -->
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">Enviar Avaliação</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                       <p>Têm a certeza que é esta a avaliação? </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
+                        <form asp-action="Create" asp-controller="Avaliacaos">
+                            <input type="hidden" name="Avaliacao_Atribuida" id="avaliacao">                            
+                            <button type="submit" class="btn btn-primary" >Sim</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+ @functions {
+    public async Task<string> GetUserAvatarUrlAsync(string userId)
+    {
+        var user = await ApplicationDbContext.Users.FirstOrDefaultAsync(p => p.Id == userId);
+        if (user != null && user.ProfilePicture != null && user.ProfilePicture.Length > 0)
+        {
+            var base64String = Convert.ToBase64String(user.ProfilePicture);
+            return $"data:image/jpeg;base64,{base64String}";
+        }
+
+        return "/path/to/default/avatar.png";
+    }
+}
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".card span").click(function () {
+                var index = $(this).index();
+                $(".card span").removeClass("checked");
+                $(".card span:lt(" + (index + 1) + ")").addClass("checked");                
+                var novaAvaliacao = index + 1;
+                $("#avaliacao").val(novaAvaliacao);
+                console.log("Nova avaliação: " + novaAvaliacao);
+                
+            });
+        });
+    </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+}
+

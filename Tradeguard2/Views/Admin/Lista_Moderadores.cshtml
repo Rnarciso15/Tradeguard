@@ -1,0 +1,314 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+@{
+    ViewData["Title"] = "Lista_Users";
+
+}
+
+@{
+    var mediaQuery = @"
+        @media only screen and (min-width: 601px) and (max-width: 960px) {
+           .table{
+                    width: 100%;
+                    overflow-x: auto;
+                    display:block;
+                 }
+        }
+    ";
+      var mediaQuery1 = @"
+        @media only screen and (max-width: 600px) {
+            .table{
+                    width: 100%;
+                    overflow-x: auto;
+                    display:block;
+                 }
+        }
+    ";
+}
+
+@section Style {
+     <style>
+        
+        .Card{
+            background-color: white;
+                transition: transform 0.2s;
+                box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+                -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                border-radius: 10px;
+                padding: 15px;
+                margin-top: 15px;
+                margin-bottom: 10px;
+        }
+
+        .Tabela_Users{
+                background-color: white;
+                transition: transform 0.2s;
+                box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+                -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                border-radius: 10px;
+                padding: 15px;
+                margin-top: 15px;
+                margin-bottom: 10px;
+        }
+         .checked {
+            color: orange;
+        }   
+        .lista_Top{
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;   
+        }
+        @Html.Raw(mediaQuery)    
+        @Html.Raw(mediaQuery1)
+  </style>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+ 
+}
+
+
+<div class="Tabela_Users">
+
+      <div style="display: flex;flex-direction: row;gap: 10px;">
+    <select id="estado_proposta" class="form-select" onchange="getUsers()">
+
+        <option value="Todos">Todos</option>
+        <option value="Mais validações">Mais validações</option>
+        <option value="Menos validações">Menos validações</option>
+    </select>
+
+
+         
+      <input type="text" id="search_input" class="form-control" placeholder="Pesquisar ID do Anúncio ou ID da proposta" onkeyup="getUsers()">
+      <form asp-controller="admin" asp-action="PaginaRegistro">
+          
+      <button  class="btn btn-outline-success" type="submit">Criar Moderador</button>
+
+      </form>
+
+ 
+    </div>
+    @{
+      var utilizadores  = await UserManager.GetUsersInRoleAsync("Moderador");
+      
+    }
+    <table id="tabela-users" class="table">
+        <thead>
+            <tr>
+                <th>Id Utilizador</th>
+                <th>CC Utilizador</th>
+                <th>Nome Utilizador</th>
+                <th>Telemóvel Utilizador</th>
+                <th>Email Utilizador</th>
+                <th>Avaliação Utilizador</th>
+                <th>Imagem de Perfil</th>
+                <th>Saldo Utilizador</th>                
+                <th>Anúncios Validados</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            @if (!utilizadores.Any())
+            {
+                <tr>
+                    <td colspan="3" class="text-center">Não há propostas de anúncios disponíveis.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var user1 in utilizadores)
+                {
+                  
+                    <tr>
+                        <td>@user1.Id</td>
+                        <td>@user1.CC</td>
+                        <td>@user1.Nome</td>
+                        <td>@user1.Telemovel</td>
+                        <td>@user1.Email</td>
+                        <td>
+                        
+                            @{
+                                Decimal avaliacaoMedia = Convert.ToDecimal(user1.Avaliacao);
+                            }
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <span class="fa @(i <= Math.Ceiling(avaliacaoMedia) ? "fa-star checked" : "fa-star")"></span>
+                            }                      
+                        
+                        </td>
+                        <td>
+                           <img src="@(await GetUserAvatarUrlAsync(user1.Id))" alt="User Avatar" class="user-avatar">
+                        </td>
+                        <td>@user1.Saldo €</td>
+                        <td>@user1.N_Validados</td>
+                    </tr>
+                }
+            }
+  
+ 
+
+              
+
+             
+        </tbody>
+
+    </table>
+
+      <div id="loading" class="loader">
+        <div class="loader--dot"></div>
+        <div class="loader--dot"></div>
+        <div class="loader--dot"></div>
+        <div class="loader--dot"></div>
+        <div class="loader--dot"></div>
+        <div class="loader--dot"></div>
+        <div class="loader--text"></div>
+    </div>
+
+    
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+
+
+
+</div>
+<div class="lista_Top">
+    @{
+        var users =  await UserManager.GetUsersInRoleAsync("Moderador");
+        var UserMelhorValidador = users.OrderByDescending(p=>p.N_Validados).FirstOrDefault();        
+        var UserPiorValidador = users.OrderBy(p=>p.N_Validados).FirstOrDefault();
+
+
+}
+@if (UserMelhorValidador != null)
+{
+    <div class="Top_Cards">
+        <div class="Card" style="max-width:20rem;">
+            <h3>Melhor Moderador</h3>
+            <div class="imgProduto">
+                <img class="card-img-top" style="border-radius:10px;max-height: 250px;" src="@(await GetUserAvatarUrlAsync(UserMelhorValidador.Id))" alt="Imagem do Produto" asp-append-version="true" />
+            </div>
+            <div class="card-body">
+                <p id="Nome">@UserMelhorValidador.Nome</p>
+                <p id="Email">@UserMelhorValidador.Email</p>
+                <p id="Email">Nº de Validados: @UserMelhorValidador.N_Validados</p>
+                
+            </div>
+        </div>
+    </div>
+}
+@if (UserPiorValidador != null )
+{
+    <div class="Top_Cards">
+        <div class="Card" style="max-width:20rem;">
+            <h3>Pior Moderador</h3>
+            <div class="imgProduto">
+                <img class="card-img-top" style="border-radius:10px;max-height: 250px;" src="@(await GetUserAvatarUrlAsync(UserPiorValidador.Id))" alt="Imagem do Produto" asp-append-version="true" />
+            </div>
+            <div class="card-body">
+                <p id="Nome">@UserPiorValidador.Nome</p>
+                <p id="Email">@UserPiorValidador.Email</p>
+                <p id="Email">Nº de Validados: @UserPiorValidador.N_Validados</p>
+                
+            </div>
+        </div>
+    </div>
+}
+
+</div>
+
+ @functions {
+    public async Task<string> GetUserAvatarUrlAsync(string userId)
+    {
+        var user = await ApplicationDbContext.Users.FirstOrDefaultAsync(p => p.Id == userId);
+        if (user != null && user.ProfilePicture != null && user.ProfilePicture.Length > 0)
+        {
+            var base64String = Convert.ToBase64String(user.ProfilePicture);
+            return $"data:image/jpeg;base64,{base64String}";
+        }
+
+        return "/path/to/default/avatar.png";
+    }
+}
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+
+     function getUsers() {
+    var searchTerm = document.getElementById("search_input").value;
+    var tipo = document.getElementById("estado_proposta").value;
+
+    $.ajax({
+        url: '/Admin/GetModeradores',
+        type: 'GET',
+        dataType: 'json',
+        data: { searchTerm: searchTerm, Tipo: tipo },
+        success: function (data) {
+            console.log(data);
+            $('#tabela-users tbody').empty();
+            $.each(data, function (index, user) {
+                var row = '<tr>' +
+                    '<td>' + user.id + '</td>' +
+                    '<td>' + user.cc + '</td>' +
+                    '<td>' + user.nome + '</td>' +
+                    '<td>' + user.telemovel + '</td>' +
+                    '<td>' + user.email + '</td>' +
+                    '<td>';
+
+                for (var i = 1; i <= 5; i++) {
+                    if (i <= Math.ceil(user.avaliacao)) {
+                        row += '<span class="fa fa-star checked"></span>';
+                    } else {
+                        row += '<span class="fa fa-star"></span>';
+                    }
+                }
+                var imageUrl = user.avatarUrl;
+
+                row += '</td>' +
+                    '<td><img src="' + imageUrl + '" alt="User Avatar" class="user-avatar"></td>' +
+                    '<td>' + user.saldo + '€</td>' +
+                     '<td>' + user.n_validados + '</td>' +
+                    '</tr>';
+                console.log(row);
+                $('#tabela-users tbody').append(row);
+                console.log(row);
+            });
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+
+
+        // Função para mostrar o loading
+        function showLoading() {
+            $('#loading').show();
+        }
+
+        // Função para ocultar o loading
+        function hideLoading() {
+            $('#loading').hide();
+        }
+
+        // Mostrar o loading ao iniciar o carregamento da página
+        $(document).ready(function () {
+            showLoading();
+        });
+
+        // Ocultar o loading quando todos os recursos da página foram carregados
+        $(window).on('load', function () {
+            hideLoading();
+        });
+    </script>
+}
+
+

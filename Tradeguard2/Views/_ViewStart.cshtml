@@ -1,0 +1,19 @@
+﻿@{
+    if(User.Identity.IsAuthenticated)
+    {
+        if (User.IsInRole("Administrador") || User.IsInRole("Moderador"))
+        {
+            Layout = "_AdminLayout";
+        }
+        else
+        {
+            Layout = "_Layout";
+        }
+   
+    }
+    else
+    {
+        Layout = "_Layout";
+    }
+
+}

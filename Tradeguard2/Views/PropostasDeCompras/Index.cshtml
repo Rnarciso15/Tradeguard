@@ -1,0 +1,322 @@
+﻿@model IEnumerable<Tradeguard2.Models.PropostasDeCompra>
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@using Tradeguard2.Helpers
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+@{
+    ViewData["Title"] = "Index";
+
+    var mediaQuery = @"
+        @media screen and (max-width: 960px) {
+               .cardProposta {
+                flex-direction: column;
+            }
+
+            .imgProposta {
+                max-width: 100%;
+                border-radius: 10px 10px 0 0;
+            }
+
+            .card-info-proposta {
+                padding: 10px;
+            }
+
+            #tituloProposta {
+                font-size: 20px;
+            }
+
+            #precoProposta {
+                font-size: 14px;
+            }
+
+            .button-container-proposta {
+                flex-direction: column;
+            }
+
+            .button-acao,
+            .button-recusar,#botao_anunciar {
+                width: 100%; /* Adicionado para ocupar 100% da largura */
+                padding: 8px;
+            }
+#precoProposta {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 0px;
+    margin-left: 0px;
+}
+        }
+        }
+    ";
+}
+@section Style {
+    <style>
+        /* (Estilos existentes) */
+
+          .cardProposta {
+            display: flex;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            width: 100%;
+            background-color: white;
+            transition: transform 0.2s;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+ -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .imgProposta {
+            flex: 1;
+            max-width: 300px;
+            border-radius: 10px 0 0 10px;
+        }
+
+        .imgProposta img {
+            width: 100%;
+            border-radius: 10px;
+            height: auto;
+        }
+
+        .card-info-proposta {
+            flex: 2;
+            padding: 20px;
+        }
+
+        #tituloProposta {
+            font-size: 24px;
+            font-weight: bold;
+            align-items: start;
+        }
+
+        #precoProposta {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 0px;
+            margin-left: 5px;
+        }
+
+        .button-container-proposta {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button-acao, .button-recusar {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .button-acao:hover, .button-recusar:hover {
+            background-color: white;
+            color: #4CAF50;
+            border-color: #4CAF50;
+            border-width: 1px;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .separador {
+            border-top: 1px solid #112647;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        #botao_anunciar {
+            color: white;
+            background-color: #112647;
+            border-color: white;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            text-decoration: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #botao_anunciar:hover {
+            color: #112647;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            text-decoration: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+                @Html.Raw(mediaQuery)
+    </style>
+}
+
+<div>
+    <div class="organizador_botoes" style="margin-top:30px;">
+        <div>
+            <h1 class="titulo">Lista de Propostas de Compra</h1>
+        </div>
+    </div>
+    <div class="separador"></div>
+    @{
+        var userLoginId = await UserManager.GetUserAsync(User);
+    }
+    @if (Model.Any(p => !p.Proposta_Aceite && p.CC_vendedor == userLoginId.CC))
+    {
+        @foreach (var proposta in Model.Where(p => !p.Proposta_Aceite))
+        {
+            var anuncio = await ApplicationDbContext.Anuncios
+            .FirstOrDefaultAsync(a => a.Id_anuncio == proposta.Id_Anuncio && a.UserId == userLoginId.Id);
+
+            if (anuncio != null)
+            {
+                var userLogin = userLoginId.CC;
+
+                <div class="cardProposta">
+                    <div class="imgProposta">
+                        <img class="card-img-top" src="@ImageHelper.GetImageLink(anuncio.Imagem_destaque, "AnunciosEnviado")" alt="Imagem do Anúncio" asp-append-version="true" />
+                    </div>
+                    <div class="card-info-proposta">
+                        <p id="tituloProposta">@Html.DisplayFor(modelItem => anuncio.Titulo)</p>
+                        <p id="precoProposta">Valor da Proposta: @Html.DisplayFor(modelItem => proposta.Preco_proposta)€</p>
+                        <div class="button-container-proposta">
+                            <form asp-action="Details" asp-controller="Anuncios" method="post">
+                                <input type="hidden" name="id" value="@anuncio.Id_anuncio" />
+                                <button type="submit" id="botao_anunciar">Ver Anúncio</button>
+                            </form>
+                            <form asp-action="AceitarProposta" asp-controller="PropostasDeCompras" method="post">
+                                <input type="hidden" name="propostaId" value="@proposta.Id_Proposta" />
+                                <button type="submit" class="button-acao">Aceitar</button>
+                            </form>
+                            <form asp-action="RecusarProposta" asp-controller="PropostasDeCompras" method="post">
+                                <input type="hidden" name="propostaId" value="@proposta.Id_Proposta" />
+                                <button type="submit" class="button-recusar">Recusar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    }
+    else
+    {
+        <p>Não existem propostas de compra.</p>
+    }
+
+    <div class="separador"></div>
+
+    <div>
+        <h1 class="titulo">Lista de Propostas de Aceites</h1>
+    </div>
+    <div class="separador"></div>
+    @if (Model.Any(p => p.Proposta_Aceite && p.CC_vendedor == userLoginId.CC && !p.Venda_Concluida))
+    {
+        @foreach (var propostaAceite in Model.Where(p => p.Proposta_Aceite))
+        {
+            var anuncioAceite = await ApplicationDbContext.Anuncios
+            .FirstOrDefaultAsync(a => a.Id_anuncio == propostaAceite.Id_Anuncio && a.UserId == userLoginId.Id);
+
+            if (anuncioAceite != null)
+            {
+                var userLogin = userLoginId.CC;
+
+                <div class="cardProposta">
+                    <div class="imgProposta">
+                        <img class="card-img-top" src="@ImageHelper.GetImageLink(anuncioAceite.Imagem_destaque, "AnunciosEnviado")" alt="Imagem do Anúncio" asp-append-version="true" />
+                    </div>
+                    <div class="card-info-proposta">
+                        <p id="tituloProposta">@Html.DisplayFor(modelItem => anuncioAceite.Titulo)</p>
+                        <p id="precoProposta">Valor da Proposta: @Html.DisplayFor(modelItem => propostaAceite.Preco_proposta)€</p>
+                        <div class="button-container-proposta">
+                            <form asp-action="Details" asp-controller="Anuncios" method="post">
+                                <input type="hidden" name="id" value="@anuncioAceite.Id_anuncio" />
+                                <button type="submit" id="botao_anunciar">Ver Anúncio</button>
+                            </form>
+                            <div style="display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;"> <p>Estado da Proposta: </p>
+                                @if (propostaAceite.Venda_Concluida)
+                                {
+                                    <span class="badge bg-success">Concluída</span>
+                                }
+                                else if (propostaAceite.Venda_Validada)
+                                {
+                                    <span class="badge bg-primary">Validada</span>
+                                }
+                                else if (propostaAceite.Produto_recebido)
+                                {
+                                    <span class="badge bg-warning text-dark">Por Validar</span>
+                                }
+                                else if (propostaAceite.Proposta_Aceite)
+                                {
+                                    <span class="badge bg-secondary">Dinheiro Pendente</span>
+                                }</div>
+                          
+
+                    
+                       
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    }
+    else
+    {
+        <p>Não existem propostas de aceites.</p>
+    }
+</div>
+
+<script>
+    var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+    document.addEventListener('DOMContentLoaded', function () {
+        connection.start().then(function () {
+            connection.invoke("MarkPropostaAsViewed", "@Html.Raw(userLoginId.CC)")
+                .catch(function (err) {
+                    console.error("Erro ao marcar propostas como vistas:", err);
+                });
+        }).catch(function (err) {
+            console.error("Erro ao iniciar a conexão com o hub:", err);
+        });
+
+        connection.start().then(function () {
+            console.log("Connected!");
+        }).catch(function (err) {
+            console.error(err.toString());
+        });
+
+        function marcarpropostasComoVistas(IdProposta) {
+            connection.invoke("MarkPropostaAsViewed", "@Html.Raw(userLoginId.CC)")
+                .catch(function (err) {
+                    console.error("Erro ao marcar mensagens como vistas:", err);
+                });
+            $.ajax
+            ({ 
+                url: '/PropostasDeCompras/Index',
+                type: 'GET', // ou method que precisa
+                success: function (dados) {
+                    var resultado = dados; 
+                },
+                error: function (erro) {
+
+                }
+            });
+        }
+    });
+</script>

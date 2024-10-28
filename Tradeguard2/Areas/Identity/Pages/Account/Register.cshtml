@@ -1,0 +1,266 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+
+@section Style {
+    <style>
+        .body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+
+
+        .card_login a {
+            text-decoration: none;
+            background-color: transparent;
+            color: #112647;
+        }
+
+        .card_login {
+            text-align: center;
+        }
+
+        .organizar_botoes {
+            display: flex;
+            flex-direction: row;
+        }
+
+
+        .button_cancelar:hover {
+            color: white;
+            background-color: #112647;
+            border-color: white;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .button_cancelar {
+            color: #112647;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .button_registar:hover {
+            color: #112647;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .button_registar {
+            color: white;
+            background-color: #112647;
+            border-color: white;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .card_login {
+            background-color: white;
+            -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            border-radius: 10px;
+            padding: 30px;
+            padding-left: 100px;
+            padding-right: 100px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            margin-bottom: 30px;
+        }
+
+        .carregar_Foto a {
+            color: #112647;
+        }
+
+        .carregar_Foto {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+        }
+    </style>
+}
+
+
+
+
+<form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" enctype="multipart/form-data" autocomplete="off">
+    <div class="body">
+
+        <div class="card_login">
+            <div class="logo">
+                <img src="~/Imagens/Logo/escudo.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                TradeGuard
+            </div>
+
+            <div class="avatar_img">
+
+                <img id="profilePicture" src="~/Imagens/UserDefault.png" class="rounded-3" style="width: 150px;"
+                     alt="Avatar" />
+
+            </div>
+
+
+            <div class="carregar_Foto">
+                <input type="file" style="display:none;" id="fileInput1"
+                       accept=".png,.jpg,.jpeg,.gif,.tif"
+                       asp-for="Input.ProfilePicture"
+                       onchange="document.getElementById('profilePicture').src = window.URL.createObjectURL(this.files[0])" />
+                <label for="fileInput1">
+                    Carregar Foto
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder-symlink" viewBox="0 0 16 16">
+                        <path d="m11.798 8.271-3.182 1.97c-.27.166-.616-.036-.616-.372V9.1s-2.571-.3-4 2.4c.571-4.8 3.143-4.8 4-4.8v-.769c0-.336.346-.538.616-.371l3.182 1.969c.27.166.27.576 0 .742z" />
+                        <path d="m.5 3 .04.87a1.99 1.99 0 0 0-.342 1.311l.637 7A2 2 0 0 0 2.826 14h10.348a2 2 0 0 0 1.991-1.819l.637-7A2 2 0 0 0 13.81 3H9.828a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 6.172 1H2.5a2 2 0 0 0-2 2zm.694 2.09A1 1 0 0 1 2.19 4h11.62a1 1 0 0 1 .996 1.09l-.636 7a1 1 0 0 1-.996.91H2.826a1 1 0 0 1-.995-.91l-.637-7zM6.172 2a1 1 0 0 1 .707.293L7.586 3H2.19c-.24 0-.47.042-.683.12L1.5 2.98a1 1 0 0 1 1-.98h3.672z" />
+                    </svg>
+                </label>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+            <div class="form-group" style="text-align:left;">
+
+                <label asp-for="Input.Nome"></label>
+                <input asp-for="Input.Nome" class="form-control" autocomplete="off" placeholder="Manel" />
+                <span asp-validation-for="Input.Nome" class="text-danger"></span>
+            </div>
+
+            <div class="form-group" style="text-align:left;">
+                <label asp-for="Input.Email"></label>
+                <input asp-for="Input.Email" class="form-control" autocomplete="off" placeholder="exemplo@gmail.com" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group" style="text-align:left;">
+
+                <label asp-for="Input.Telemovel"></label>
+                <input asp-for="Input.Telemovel" class="form-control" autocomplete="off" oninput="formatarTelefone(this)" maxlength="11" placeholder="000 000 000" />
+                <span asp-validation-for="Input.Telemovel" class="text-danger"></span>
+            </div>
+            <div class="form-group" style="text-align:left;">
+
+                <label asp-for="Input.CC"></label>
+                <input asp-for="Input.CC" class="form-control" autocomplete="off" maxlength="15" placeholder="00000000 0 AA 0" />
+                <span asp-validation-for="Input.CC" class="text-danger"></span>
+            </div>
+            <div class="form-group" style="text-align:left;">
+
+                <label asp-for="Input.Password">Senha</label>
+                <input asp-for="Input.Password" class="form-control" autocomplete="off" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+            <div class="form-group" style="text-align:left;">
+
+                <label asp-for="Input.ConfirmPassword">Confirmar Senha</label>
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="off" />
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+            <div id="organizar_botoes">
+
+
+                <button class="button_cancelar" type="button" onclick="location.href='@Url.Page("/Account/Login")'">
+                    Cancelar
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                    </svg>
+
+                </button>
+
+
+
+                <button class="button_registar" id="registerSubmit" type="submit">
+                    Registar
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-plus" viewBox="0 0 16 16">
+                        <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
+                        <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z" />
+                    </svg>
+                </button>
+
+            </div>
+
+
+
+        </div>
+
+
+
+
+
+
+    </div>
+
+</form>
+
+
+@section Scripts {
+
+    <script>
+        function formatarTelefone(input) {
+            // Remove todos os caracteres que não são números do valor atual
+            var valor = input.value.replace(/\D/g, '');
+
+            // Adiciona espaços conforme o padrão especificado
+            var novoValor = '';
+            for (var i = 0; i < valor.length; i++) {
+                if (i === 3 || i === 6) {
+                    novoValor += ' ';
+                }
+                novoValor += valor[i];
+            }
+
+            // Define o valor formatado no campo de entrada
+            input.value = novoValor;
+        }
+
+        function carregarImagem() {
+            var input = document.getElementById('fileInput1');
+            var avatarImage = document.getElementById('avatarImage');
+
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    avatarImage.src = e.target.result;
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+    <partial name="_ValidationScriptsPartial" />
+}

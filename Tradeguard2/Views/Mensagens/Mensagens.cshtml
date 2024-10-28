@@ -1,0 +1,571 @@
+﻿@using Tradeguard2.Data
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _context
+@model List<Tradeguard2.Models.Mensagens>
+
+@{
+    ViewData["Title"] = "Mensagem Chat";
+
+    var mediaQuery = @"
+         @media screen and (min-width: 769px) {
+            #div_geral {
+                display: flex;
+                height: 100vh;
+                border-radius: 10px;
+                padding: 50px;
+                padding-left: 100px;
+                padding-right: 100px;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+.mensagem-enviada {
+    background-color: #112647;
+    color: white;
+}
+
+.mensagem-recebida {
+    background-color: white;
+    color: #112647;
+}
+                  .lista_lateral {
+            width: 200px;
+            background-color: #112647; /* Altere para a mesma cor das mensagens */
+            border-right: 1px solid #ccc;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+
+        .lista_amigos {
+            border-radius: 10px;
+            list-style: none;
+            padding: 10px;
+            margin: 0;
+            margin: 10px;
+        }
+
+        .lista_amigos li {
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #ddd;
+            color: white; /* Cor do texto da lista de amigos */
+        }
+
+        .lista_amigos li:hover {
+            background-color: #084B8A;
+        }
+
+
+            .mensagens_area {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                padding: 20px;
+            }
+
+            .mensagens_lista {
+                flex: 1;
+                overflow-y: auto;
+            }
+
+            .mensagem {    
+                padding: 10px;
+                border-radius: 10px;
+                margin-top: 10px;
+                clear: both;
+            }
+
+            .enviada {
+                float: right;
+            }
+
+            .recebida {
+                float: left;
+            }
+
+            #message {
+                word-wrap: break-word;
+                border-radius: 10px;
+                margin-top: 10px;
+                padding: 10px;
+                width: 100%;
+                border: none;
+            }
+
+            #sendButton {
+                border-radius: 10px;
+                margin-top: 10px;
+                padding: 10px;
+            background-color: #084B8A;
+                color: white;
+                cursor: pointer;
+                border: none;
+            }
+
+            .user {
+                font-weight: bold;
+            color: #084B8A;
+            }
+        }
+    ";
+
+    var mediaQuery1 = @"
+        @media screen and (max-width: 960px) {
+            #div_geral {
+                padding: 10px;
+                margin: 5px;
+            }
+.mensagem-enviada {
+    background-color: #112647;
+    color: white;
+}
+
+.mensagem-recebida {
+    background-color: white;
+    color: #112647;
+}
+            .lista_lateral {
+                width: 30%;
+                max-width: none;
+                border-right: none;
+                margin-bottom: 10px;
+            }
+   .mensagens_area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+
+                max-width: 70%;
+        }
+            .mensagem {
+                word-wrap: break-word;
+                padding: 8px;
+                margin-top: 8px;
+                max-width: 70%;
+            }
+
+            .enviada,
+            .recebida {
+                float: none;
+                max-width: 100%;
+            }
+.lista_amigos {
+    border-radius: 10px;
+    list-style: none;
+    padding: 10px;
+    margin: auto;
+}
+    .lista_amigos li {
+                  border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+    color: white;
+    word-break: break-all;
+    text-align: center;
+            }
+        }
+    ";
+}
+
+@section Style {
+    <style>
+        .usuario-item{
+        }
+     .bolinha-azul {
+   
+            justify-content: center;
+    display: flex;
+    width: 20px;
+    height: 20px;
+    background-color: #4895ff;
+    border-radius: 50%;
+    color: white;
+    margin-left: 10px;
+    align-items: center;
+}
+
+    .hora {
+    display: flex;
+    font-size: 11px;
+}
+.enviada-hora {
+    color: #babdbf;
+    justify-content: flex-end;
+}
+
+.recebida-hora {
+    color: #084B8A;
+    justify-content: flex-start;
+}
+        #div_geral {
+            display: flex;
+            height: 100vh;
+            border-radius: 10px;
+            padding: 50px;
+            padding-left: 100px;
+            padding-right: 100px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .lista_lateral {
+            width: 200px;
+            background-color: #112647; /* Altere para a mesma cor das mensagens */
+            border-right: 1px solid #ccc;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+
+        .lista_amigos {
+            border-radius: 10px;
+            list-style: none;
+            padding: 10px;
+            margin: 0;
+            margin: 10px;
+        }
+
+        .lista_amigos li {         
+    display: flex;
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+    align-items: center;
+    color:white;
+    word-break: break-all;
+    text-align: center;
+        }
+
+        .lista_amigos li:hover {
+            background-color: #084B8A;
+        }
+
+        .mensagens_area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .mensagens_lista {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .mensagem {
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            clear: both;
+        }
+
+        .enviada {
+            float: right;
+        }
+
+        .recebida {
+            float: left;
+        }
+
+        #message {
+            border-radius: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%;
+            border: none;
+        }
+
+        #sendButton {
+            border-radius: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #084B8A;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+     .user {
+            font-weight: bold;
+        }
+
+        .hora-container {
+    display: flex;
+    align-items: center;
+}
+
+.check-icon {
+    margin-left: 5px; 
+    color: #084B8A;
+}
+ .mensagens-nao-vistas {
+        color: #e44d26;
+        font-weight: bold;
+    }
+        @Html.Raw(mediaQuery)
+        @Html.Raw(mediaQuery1)
+    </style>
+}
+
+@{
+    var user = ViewBag.User as ApplicationUser;
+    var userNomeLogin = user.Nome;
+    var mensagens = Model;
+    var idDestinatario = ViewData["IdDestinatario"]?.ToString();
+    var nomeDestinatário = _userManager.FindByIdAsync(idDestinatario).Result?.Nome;
+}
+<div>
+    <input type="hidden" id="userIDLogin" value="@user.Id" />
+    <input type="hidden" id="username" value="@user.Nome" />
+    <input type="hidden" id="userID" value="" />
+    <input type="hidden" id="userNomeLogin" value="@userNomeLogin" />
+</div>
+<div id="div_geral">
+    <div class="lista_lateral">
+        <ul class="lista_amigos">
+            @{
+                var userID1 = user.Id;
+                var ListaMensagens = _context.Mensagens
+                    .Where(m => m.Utilizador_1 == user.Id || m.Utilizador_2 == user.Id)
+                    .ToList();
+                var idsUsuarios = ListaMensagens
+                    .Select(m => new[] { m.Utilizador_1, m.Utilizador_2 })
+                    .SelectMany(ids => ids)
+                    .Distinct()
+                    .ToList();
+                  
+            }
+            @foreach (var idUsuario in idsUsuarios)
+            {
+                if (idUsuario != user.Id)
+                {
+                    var CountMensagensvistas = _context.Mensagens.Where(m => m.Mensagem_Vista == false && ((m.Utilizador_1 == idUsuario && m.Utilizador_2 == user.Id))).ToList();
+                    var nomeUsuario = _userManager.FindByIdAsync(idUsuario).Result?.Nome;
+                    if(CountMensagensvistas.Count > 0)
+                    {
+                      <li class="usuario-item" id="@idUsuario">
+                        @nomeUsuario
+                        <span id="unreadCount_@idUsuario" class="unread-count bolinha-azul">@CountMensagensvistas.Count</span>
+                    </li>
+
+                    }
+                    else
+                    {
+                         <li class="usuario-item" id="@idUsuario">
+                        @nomeUsuario
+                        </li>
+                    }
+                   
+                }
+            }
+        </ul>
+    </div>
+    <div class="mensagens_area" id="mensagens_area">
+        <div class="mensagens_lista" id="chatBox">
+        </div>
+        <input type="text" id="message" placeholder="Digite sua mensagem">
+        <button id="sendButton">Enviar</button>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+ 
+    connection.on("ReceiveMessage", function (userId, user, message, horaEnvio, isProposal) {
+        var messageContainer = $("<div class='mensagem'></div>");
+        var userContainer = $("<div class='user'></div>").text(user);
+
+        // Adicione a hora de envio
+           var horaContainer = $("<div class='hora hora-container'></div>").text(horaEnvio);
+
+
+        // Adicione o ID do usuário que enviou a mensagem como um atributo de dados
+         horaContainer.attr("data-sender-id", userId);
+
+        // Marque a mensagem como vista se o remetente for diferente do usuário que abriu o chat
+        if (userId !== $("#userIDLogin").val()) {
+            // Se a mensagem foi vista, adicione o ícone
+             if (isProposal.MensagemVista) {
+            horaContainer.append("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-check-all check-icon' viewBox='0 0 16 16'><path d='M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.95 4.992zm-.92 5.14.92.92a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 1 0-1.091-1.028L9.477 9.417l-.485-.486z'/></svg>");
+                 }
+
+
+        }
+
+        // Adicione classes com base na direção da mensagem
+        if (user === $("#userNomeLogin").val()) {
+            messageContainer.addClass("enviada mensagem-enviada");
+        } else {
+            messageContainer.addClass("recebida mensagem-recebida");
+        }
+
+        var textContainer = $("<div class='texto'></div>").text(message);
+
+        // Adicione os contêineres ao elemento da mensagem
+        messageContainer.append(userContainer).append(textContainer).append(horaContainer);
+
+        // Adicione a mensagem ao chat
+        $("#chatBox").append(messageContainer);
+
+        // Role até o final do chat
+        $("#chatBox").scrollTop($("#chatBox")[0].scrollHeight);        
+        var userId = $("#userID").val();
+          carregarMensagens(userId);
+    });
+
+    $("#sendButton").click(function () {
+        var userId = $("#userID").val();
+        var message = $("#message").val();
+        var currentDate = new Date().toISOString();
+
+        if (message.trim() !== "") {
+            connection.invoke("SendMessage", userId, message, currentDate)
+                .catch(function (err) {
+                    console.error("Erro ao enviar mensagem:", err);
+                })
+                .then(function () {
+                    // After sending the message, load the messages for the selected user
+                    carregarMensagens(userId);
+                });
+
+            $("#message").val("").focus();
+        } else {
+            alert("Por favor, digite uma mensagem válida.");
+        }
+    });
+
+    connection.start().then(function () {
+        console.log("Connected!");
+    }).catch(function (err) {
+        console.error(err.toString());
+    });
+
+    $(document).ready(function () {
+        $(".lista_amigos").on("click", ".usuario-item", function () {
+            var idUsuarioClicado = $(this).attr("id");
+            var nomeUsuarioClicado = $(this).text();
+            console.log("Carregar Mensagens para o ID do Usuário:", idUsuarioClicado);
+            $("#userID").val(idUsuarioClicado);
+            $("#username").val(nomeUsuarioClicado);
+            carregarMensagens(idUsuarioClicado);
+        });
+
+        var primeiroUsuario = $(".usuario-item:first");
+        if (primeiroUsuario.length > 0) {
+            var idPrimeiroUsuario = primeiroUsuario.attr("id");
+            var nomePrimeiroUsuario = primeiroUsuario.text();
+            $("#userID").val(idPrimeiroUsuario);
+            $("#username").val(nomePrimeiroUsuario);
+            carregarMensagens(idPrimeiroUsuario);
+        }
+
+        var idDestinatario = '@ViewData["IdDestinatario"]';
+        var nomeDestinatário = '@nomeDestinatário';
+
+        if (idDestinatario) {
+            document.getElementById("userID").value = idDestinatario;
+            adicionarAListaDeAmigos(idDestinatario, nomeDestinatário);
+            carregarMensagens(idDestinatario);
+        }
+
+        function adicionarAListaDeAmigos(idUsuario, nomeUsuario) {
+            if ($(".lista_amigos .usuario-item#" + idUsuario).length === 0) {
+                var novoItem = $("<li class='usuario-item'></li>")
+                    .attr("id", idUsuario)
+                    .text(nomeUsuario);
+                $(".lista_amigos").append(novoItem);
+            }
+        }
+    });
+
+    function carregarMensagens(idUsuarioClicado) {
+        console.log("Carregando mensagens para o ID do Usuário:", idUsuarioClicado);      
+        
+        $.ajax({
+            url: "/Mensagens/CarregarMensagens",
+            method: "GET",
+            data: { idUsuario1: $("#userIDLogin").val(), idUsuario2: idUsuarioClicado },
+            success: function (data) {
+                  marcarMensagensComoVistas(idUsuarioClicado);
+                $("#chatBox").empty();
+                if (data && data.length > 0) {
+                    for (var i = 0; i < data.length; i++) {
+                        console.log("Data:", data[i].Data);
+                        var messageContainer = $("<div class='mensagem'></div>");
+                        var userContainer = $("<div class='user'></div>").text(data[i].usuario);
+                  var messageDate = new Date(data[i].data);
+                    var options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false };
+                    var formattedDate = messageDate.toLocaleDateString('pt-PT', options);
+                    var horaContainer = $("<div class='hora'></div>").text(formattedDate);
+
+
+                    if (data[i].usuario === $("#userNomeLogin").val()) {
+
+                        horaContainer.addClass("enviada-hora");
+                    } else {
+
+                        horaContainer.addClass("recebida-hora");
+                    }
+                          horaContainer.attr("data-sender-id", data[i].userId);
+
+                      if (data[i].userId !== $("#userIDLogin").val()) {
+                          if (data[i].mensagemVista) {
+                              horaContainer.append("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-check-all check-icon' viewBox='0 0 16 16'><path d='M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.95 4.992zm-.92 5.14.92.92a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 1 0-1.091-1.028L9.477 9.417l-.485-.486z'/></svg>");
+                          }
+                          else {
+                     horaContainer.append("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='#6c757d' class='bi bi-check-all check-icon' viewBox='0 0 16 16'><path d='M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.95 4.992zm-.92 5.14.92.92a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 1 0-1.091-1.028L9.477 9.417l-.485-.486z'/></svg>");
+                             }
+                      }
+                       if (data[i].userId === $("#userIDLogin").val()) {
+                          if (data[i].mensagemVista) {
+                              horaContainer.append("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-check-all check-icon' viewBox='0 0 16 16'><path d='M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.95 4.992zm-.92 5.14.92.92a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 1 0-1.091-1.028L9.477 9.417l-.485-.486z'/></svg>");
+                          }
+                          else {
+                     horaContainer.append("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='#6c757d' class='bi bi-check-all check-icon' viewBox='0 0 16 16'><path d='M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.95 4.992zm-.92 5.14.92.92a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 1 0-1.091-1.028L9.477 9.417l-.485-.486z'/></svg>");
+                             }
+                      }
+                        // Adicione classes com base na direção da mensagem
+                        if (data[i].usuario === $("#userNomeLogin").val()) {
+                            messageContainer.addClass("enviada mensagem-enviada");
+                        } else {
+                            messageContainer.addClass("recebida mensagem-recebida");
+                        }
+
+                        var textContainer = $("<div class='texto'></div>").text(data[i].mensagem);
+
+                        // Adicione os contêineres ao elemento da mensagem
+                        messageContainer.append(userContainer).append(textContainer).append(horaContainer);
+
+                        // Adicione a mensagem ao chat
+                        $("#chatBox").append(messageContainer);
+
+                        // Role até o final do chat
+                  
+                        
+                        $("#chatBox").scrollTop($("#chatBox")[0].scrollHeight);
+                    $("#unreadCount_" + idUsuarioClicado).hide();
+                    
+                    }
+                } else {
+                    console.log("Nenhuma mensagem encontrada.");
+                }
+            },
+            error: function (error) {
+                console.error("Erro ao carregar mensagens:", error);
+            }
+        });
+    }
+
+    function marcarMensagensComoVistas(idUsuarioClicado) {
+    connection.invoke("MarkMessagesAsViewed", $("#userIDLogin").val(), idUsuarioClicado)
+        .catch(function (err) {
+            console.error("Erro ao marcar mensagens como vistas:", err);
+        });
+}
+</script>
+
+}

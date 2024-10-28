@@ -1,0 +1,274 @@
+﻿@model List<Tradeguard2.Models.AnunciosFavoritosViewModel>
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@using Tradeguard2.Helpers
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+@{
+    ViewData["Title"] = "Index";
+    var mediaQuery = @"
+        @media screen and (max-width: 960px) {
+            /* Estilos para telas menores que 768px */
+
+            .cardProduto {
+                flex-direction: column;
+            }
+
+            .imgProduto {
+                max-width: 100%;
+                border-radius: 10px 10px 0 0;
+            }
+
+            .card-info {
+                padding: 10px;
+            }
+
+            #titulo {
+                font-size: 20px;
+            }
+
+            #Preco {
+                font-size: 14px;
+            }
+
+            #localizacao_hora {
+                font-size: 12px; /* Ajuste o tamanho conforme necessário */
+                margin-top: 5px; /* Ajuste conforme necessário */
+            }
+
+            .button-container {
+                flex-direction: column;
+                align-items: stretch; /* Faz com que os botões ocupem toda a largura */
+            }
+
+            #botao_anunciar {
+                width: 100%; /* Ocupa 100% da largura */
+                padding: 8px;
+            }
+
+            .separador {
+                margin-bottom: 20px; /* Ajuste conforme necessário */
+            }
+
+            .titulo {
+                margin-top: 20px; /* Ajuste conforme necessário */
+            }
+#Preco {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 0px;
+    margin-left: 0px;
+}
+        }
+    ";
+}
+@section Style {
+    <style>
+        .separador {
+            border-top: 1px solid #112647;
+            margin-top: 20px;
+            margin-bottom: 60px;
+        }
+
+        .cardProduto {
+            display: flex;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .imgProduto {
+            flex: 1;
+            max-width: 300px;
+            border-radius: 10px 0 0 10px;
+        }
+
+            .imgProduto img {
+                width: 100%;
+                height: auto;
+            }
+
+        .card-info {
+            flex: 2;
+            padding: 20px;
+        }
+
+        #titulo {
+            font-size: 24px;
+            font-weight: bold;
+            align-items: start;
+        }
+
+        #Preco {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 0px;
+            margin-left: 5px;
+        }
+
+        #localizacao_hora {
+            font-size: 14px;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        .cardProduto {
+            background-color: white;
+            transition: transform 0.2s;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+           -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+            .cardProduto:hover {
+                transform: translateX(-10px);
+                cursor: pointer;
+            }
+
+        .card-img-top {
+            border-radius: 10px;
+        }
+
+        #botao_anunciar {
+            color: white;
+            background-color: #112647;
+            border-color: white;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            text-decoration: none;
+            padding: 10px;
+        }
+
+            #botao_anunciar:hover {
+                color: #112647;
+                background-color: white;
+                border-color: #112647;
+                border-radius: 10px;
+                border-width: 2px;
+                border-style: solid;
+                text-decoration: none;
+                padding: 10px;
+            }
+
+        .titulo {
+            margin-top: 30px;
+        }
+
+        .button_Editar {
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+           .button_Editar:hover {
+            background-color: #bb1a1a;
+            border-color: #bb1a1a;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .button_Editar:hover a{
+             color: white;
+        }
+
+            .button_Editar a {
+                color: #112647;
+            }
+
+        .organizador_botoes {
+        }
+
+        .button_Editar {
+            align-items: end;
+        }
+        
+                @Html.Raw(mediaQuery)
+    </style>
+}
+<div>
+
+    <div class="organizador_botoes">
+        <div>
+            <h1 class="titulo">Lista de anúncios favoritos</h1>
+        </div>
+        <div class="button_Editar">
+            <A asp-action="RemoverTodosAnunciosFavoritos" asp-controller="Favoritos" style="text-decoration:none;">
+                Remover todos os anúncios
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z" />
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z" />
+                </svg>
+            </A>
+        </div>
+    </div>
+    <div class="separador"></div>
+
+    @if (Model != null)
+    {
+          @foreach (var item in Model)
+    {
+        var userLogin = (await UserManager.GetUserAsync(User)).CC;
+        var anuncio = await ApplicationDbContext.Anuncios
+        .FirstOrDefaultAsync(a => a.Id_anuncio == item.Anuncios.Id_anuncio);
+
+        <div class="cardProduto">
+            <div class="imgProduto">
+                <img class="card-img-top" src="@ImageHelper.GetImageLink(anuncio.Imagem_destaque, "AnunciosEnviado")" alt="Imagem do Produto" asp-append-version="true" />
+            </div>
+            <div class="card-info">
+                <p id="titulo">@Html.DisplayFor(modelItem => anuncio.Titulo)</p>
+                <p id="Preco">@Html.DisplayFor(modelItem => anuncio.Preco)€</p>
+                <p id="localizacao_hora">@Html.DisplayFor(modelItem => anuncio.localizacao)</p>
+                <div class="button-container" style=" display: flex;">
+                    <input type="hidden" name="CC" value="@UserManager.GetUserAsync(User).Result.CC" />
+
+                    <form asp-action="Details" asp-controller="Anuncios" method="post">
+                        <input type="hidden" name="id" value="@anuncio.Id_anuncio" />
+                        <button type="submit" id="botao_anunciar">Ver Anúncio</button>
+                      </form>
+                    <form asp-action="DeleteConfirmed" asp-controller="Favoritos" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Id_Favorito" value="@item.Anuncios.Id_anuncio">
+                        <button type="submit" id="botao_anunciar">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        }
+    }
+    else
+    {
+        <p>Ainda não existem anúncios nos favoritos.</p>
+    }
+
+
+
+
+</div>
+
+@section Scripts {
+
+}
+

@@ -1,0 +1,1276 @@
+﻿@model Tradeguard2.Models.Anuncios
+
+@{
+    ViewData["Title"] = "Create";
+    var mediaQuery = @"
+        @media only screen and (max-width: 960px) {
+            .imagens > a {
+                flex: 0 0 calc(100% - 10px);
+            }
+
+            .imagens1 > div {
+                flex: 0 0 calc(100% - 10px);
+            }
+
+            .imagens1 {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+            }
+
+            .imagens1 > div {
+                margin: 5px;
+            }
+
+            .filtros {
+                   display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                }
+.filtros_selecionados {
+                justify-content: center; /* Centraliza o conteúdo */
+                text-align: center; /* Centraliza o texto */
+            }
+
+            .subcategoria-selecionada,
+            .categoria-selecionada {
+                display: flex;
+                align-items: center;
+                justify-content: center; /* Centraliza o botão de cancelar */
+                text-align: center; /* Centraliza o texto */
+            margin-left:0px;
+            }
+        }
+    ";
+}
+@section Style {
+    <style>
+
+        .imagens > a {
+            flex: 0 0 calc(15% - 10px);
+            margin: 5px;
+        }
+
+
+        .imagem-categoria {
+            transition: transform 0.2s;
+        }
+
+            .imagem-categoria:hover {
+                transform: translateY(-10px);
+                cursor: pointer;
+            }
+
+        .Sub-categorias a {
+            background-color: transparent;
+            text-decoration: none;
+            color: black;
+        }
+
+        .categorias a {
+            background-color: transparent;
+            text-decoration: none;
+            color: black;
+        }
+
+        .separador {
+            border-top: 1px solid #112647;
+            margin-top: 20px;
+            margin-bottom: 60px;
+        }
+
+      .filtros {
+    display: flex;
+    align-items: center;
+    margin: 10px;
+    margin-top: 60px;
+}
+
+.filtros button,
+.filtros input,
+.filtros .dropdown {
+    margin-right: 10px;
+}
+
+
+
+
+
+
+
+
+
+
+        #mostrarSubcategorias {
+            color: white;
+            background-color: #112647;
+            border-color: white;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            width: 50%;
+        }
+
+            #mostrarSubcategorias:hover {
+                color: #112647;
+                background-color: white;
+                border-color: #112647;
+                border-radius: 10px;
+                border-width: 2px;
+                border-style: solid;
+                width: 50%;
+            }
+
+        #mostrarCategorias {
+            color: white;
+            background-color: #112647;
+            border-color: white;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+        }
+
+            #mostrarCategorias:hover {
+                color: #112647;
+                background-color: white;
+                border-color: #112647;
+                border-radius: 10px;
+                border-width: 2px;
+                border-style: solid;
+            }
+
+
+
+
+
+
+
+
+        .Sub-categorias {
+            background-color: white;
+            border-width: 1px;
+            border-color: #112647;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .categorias {
+            background-color: white;
+            border-width: 1px;
+            border-color: #112647;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .imagens {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: 20px;
+        }
+
+        .filtros_selecionados {
+            display: flex;
+            align-items: center;
+            margin: 10px;
+            margin-top: 60px;
+        }
+
+        .subcategoria-selecionada {
+            color: #112647;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            margin-left: 10px;
+        }
+
+        .categoria-selecionada {
+            color: #112647;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+        }
+
+        #resultadoPesquisa a {
+            display: block;
+            padding: 10px;
+            margin-bottom: 5px;
+            background-color: #f4f4f4;
+            text-decoration: none;
+            color: #333;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+            #resultadoPesquisa a:hover {
+                background-color: #ddd;
+            }
+
+        .imagens1 {
+            background-color: white;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+            .imagens1 > div {
+                flex: 0 0 calc(25% - 10px);
+                margin: 5px;
+            }
+
+        .carregar_Foto a {
+            color: #112647;
+        }
+
+        .carregar_Foto {
+            margin-bottom: 20px;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+        }
+
+        #button_drop {
+            color: #112647;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+        }
+
+        #decricao {
+            background-color: white;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+          -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .titulo_geral {
+            background-color: white;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+          -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        #localizacao1 {
+            background-color: white;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+        -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .dados_contacto {
+            background-color: white;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+         -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .validacao {
+            background-color: white;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+       -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .bottun_publicar {
+            margin-bottom: 20px;
+            color: white;
+            background-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+        }
+
+        .bottun_visualizar {
+            margin-bottom: 20px;
+            background-color: white;
+            border-color: #112647;
+            border-radius: 10px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 10px;
+            display: inline-block;
+        }
+        .IMG_principal{
+                border-style: dashed;
+    border-width: 2px;
+    border-radius: 10px;
+    border-color: #0a58ca;
+        }
+        
+  @Html.Raw(mediaQuery)
+    </style>
+
+}
+
+
+<div id="div_geral" class="text-center">
+    <form asp-action="Create" enctype="multipart/form-data">
+
+        <div class="titulo_geral">
+
+            <h1 style="margin-bottom:20px;margin-top:20px;">Publicar anúncio</h1>      
+      
+
+
+            <div class="input-group mb-3">
+
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Titulo</span>
+                </div>
+
+                <input asp-for="Titulo" type="text" class="form-control" placeholder="ex: Guitarra elétrica" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="filtros_selecionados">
+
+
+                <div class="categoria-selecionada" style="display: none;">
+                    <span id="categoria-texto"></span>
+                    <button id="removerCategoria" style=" margin-left:10px;border-radius: 10px; border-style: solid;" class="btn_remover">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" style="color:#112647;margin:2px;" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="subcategoria-selecionada" style="display: none;">
+                    <span id="subcategoria-texto"></span>
+                    <button id="removerSubcategoria" style="margin-left: 10px; border-radius: 10px; border-style: solid;" class="btn_remover">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" style="color: #112647; margin: 2px;" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+            <div class="filtros">
+
+                <button id="mostrarCategorias" type="button" class="btn btn-primary">Categorias</button>
+                <button id="mostrarSubcategorias" type="button" class="btn btn-primary">Sub-categorias</button>
+                <div class="input-group mb-3">
+
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Preço</span>
+                    </div>
+
+                    <input asp-for="Preco" type="number" class="form-control" placeholder="ex:1,00 €" aria-describedby="basic-addon1" min="0">
+                </div>
+                <input type="hidden" asp-for="Categoria" id="input_Categoria">
+                <input asp-for="SubCategoria" type="hidden" id="input_SubCategoria">
+
+            </div>
+
+
+            <div class="separador"></div>
+
+    <div class="Sub-categorias" style="display: none;">
+        <div style="text-align:center;">
+            <h1>Sub-categorias</h1>
+            <div class="carros" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/carros_motas_barcos/car.png" style="width: 100px;" alt="Carro">
+                        <p>Carros</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/carros_motas_barcos/motorbike.png" style="width: 100px;" alt="Carro">
+                        <p>Motas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/carros_motas_barcos/truck.png" style="width: 100px;" alt="Carro">
+                        <p>Camiões</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/carros_motas_barcos/camper.png" style="width: 100px;" alt="Carro">
+                        <p>Autocaravanas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/carros_motas_barcos/speed-boat.png" style="width: 100px;" alt="Carro">
+                        <p>Barcos</p>
+                    </a>
+                </div>
+            </div>
+            <div class="imoveis" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/Imoveis/apartment.png" style="width: 100px;" alt="imoveis">
+                        <p>Apartamentos</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias//Imoveis/bed.png" style="width: 100px;" alt="imoveis">
+                        <p>Quartos</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/Imoveis/garage.png" style="width: 100px;" alt="imoveis">
+                        <p>Garagens</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/Imoveis/house.png" style="width: 100px;" alt="imoveis">
+                        <p>Casas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/Imoveis/Land1.png" style="width: 100px;" alt="imoveis">
+                        <p>Terrenos</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/Imoveis/store.png" style="width: 100px;" alt="imoveis">
+                        <p>Lojas</p>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="Bebe_Crianca" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/bebe_crianca/baby-outfit.png" style="width: 100px;" alt="Bebe_Crianca">
+                        <p>Roupinhas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/bebe_crianca/baby-shoes.png" style="width: 100px;" alt="Bebe_Crianca">
+                        <p>Calçado</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/bebe_crianca/baby-walker.png" style="width: 100px;" alt="Bebe_Crianca">
+                        <p>Passeio</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/bebe_crianca/baby.png" style="width: 100px;" alt="Bebe_Crianca">
+                        <p>Relaxar e Dormir</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/bebe_crianca/cutlery.png" style="width: 100px;" alt="Bebe_Crianca">
+                        <p>Refeição</p>
+                    </a>
+                </div>
+            </div>
+            <div class="lazer" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/lazer/amphora.png" style="width: 100px;" alt="lazer">
+                        <p>Colecções - Antiguidades</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/lazer/apple.png" style="width: 100px;" alt="lazer">
+                        <p>Livros - Revistas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/lazer/board-games.png" style="width: 100px;" alt="lazer">
+                        <p>Brinquedos - Jogos</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/lazer/dvd.png" style="width: 100px;" alt="lazer">
+                        <p>DVD - Filmes</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/lazer/violin.png" style="width: 100px;" alt="lazer">
+                        <p>Instrumentos Musicais</p>
+                    </a>
+                </div>
+            </div>
+             <div class="Telemoveis_Tablets" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/telemoveis_tablets/smartphone.png" style="width: 100px;" alt="Telemoveis_Tablets">
+                        <p>Telemóveis</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/telemoveis_tablets/phone-case.png" style="width: 100px;" alt="Telemoveis_Tablets">
+                        <p>Acessórios</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/telemoveis_tablets/tablet.png" style="width: 100px;" alt="Telemoveis_Tablets">
+                        <p>Tablets</p>
+                    </a>
+                    
+                </div>
+            </div>
+             <div class="Agricultura" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/agricultura/flax-seed.png" style="width: 100px;" alt="Agricultura">
+                        <p>Sementes,Árvores e Produtos Agricolas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/agricultura/gardening.png" style="width: 100px;" alt="Agricultura">
+                        <p>Alfaias Agricolas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/agricultura/tractor.png" style="width: 100px;" alt="Agricultura">
+                        <p>Tratores</p>
+                    </a>
+                    
+                </div>
+            </div>
+                <div class="Animais" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/animais/adoption.png" style="width: 100px;" alt="Animais">
+                        <p>Animais Para Adoção</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/animais/cow.png" style="width: 100px;" alt="Animais">
+                        <p>Animais de Quinta</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/animais/dog-collar.png" style="width: 100px;" alt="Animais">
+                        <p>Acessórios</p>
+                    </a>
+                    
+                </div>
+            </div>
+              <div class="Desporto" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/bike.png" style="width: 100px;" alt="Desporto">
+                        <p>Bicicletas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/billiard.png" style="width: 100px;" alt="Desporto">
+                        <p>Bilhar</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/walking.png" style="width: 100px;" alt="Desporto">
+                        <p>Caminhada,Corrida e Atletismo</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/camping-tent.png" style="width: 100px;" alt="Desporto">
+                        <p>Campismo</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/martial-arts.png" style="width: 100px;" alt="Desporto">
+                        <p>Desportos de Combate</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/goal.png" style="width: 100px;" alt="Desporto">
+                        <p>Futsal e Futebol</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/golf.png" style="width: 100px;" alt="Desporto">
+                        <p>Golf</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/dumbbell.png" style="width: 100px;" alt="Desporto">
+                        <p>Musculação e Fitness</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/surfboard.png" style="width: 100px;" alt="Desporto">
+                        <p>Surf e Bodyboard</p>
+                    </a>
+                </div>
+            </div>
+              <div class="Moda" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moda/sport-shoes.png" style="width: 100px;" alt="Moda">
+                        <p>Calçado</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moda/wristwatch.png" style="width: 100px;" alt="Moda">
+                        <p>Jóias, Relógios e Bijuteria</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moda/shopping-bag.png" style="width: 100px;" alt="Moda">
+                        <p>Malas e Acessórios</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moda/sewing-machine.png" style="width: 100px;" alt="Moda">
+                        <p>Retrosaria</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moda/hanger.png" style="width: 100px;" alt="Moda">
+                        <p>Roupa</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moda/suncream.png" style="width: 100px;" alt="Moda">
+                        <p>Saúde - Beleza</p>
+                    </a>
+                    
+                </div>
+            </div>
+             <div class="Moveis_Casa_Jardim" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moveis_casa_jardim/laundry.png" style="width: 100px;" alt="Moveis_Casa_Jardim">
+                        <p>Electrodomésticos</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moveis_casa_jardim/watering-plants.png" style="width: 100px;" alt="Moveis_Casa_Jardim">
+                        <p>Jardim e Bricolage</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moveis_casa_jardim/armchair.png" style="width: 100px;" alt="Moveis_Casa_Jardim">
+                        <p>Móveis</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moveis_casa_jardim/flower.png" style="width: 100px;" alt="Moveis_Casa_Jardim">
+                        <p>Utilidades e Decoração</p>
+                    </a>                 
+                    
+                </div>
+            </div>
+                  <div class="Tecnologia" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/tecnologia/computer.png" style="width: 100px;" alt="Tecnologia">
+                        <p>Computadores - Informática</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/tecnologia/plug.png" style="width: 100px;" alt="Tecnologia">
+                        <p>Electrónica</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/tecnologia/tv-speaker.png" style="width: 100px;" alt="Tecnologia">
+                        <p>TV, Som e Fotografia</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/tecnologia/video-console.png" style="width: 100px;" alt="Tecnologia">
+                        <p>Videojogos - Consolas</p>
+                    </a>                 
+                    
+                </div>
+            </div>
+                       <div class="Equipamentos_Ferramentas" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/equiamentos_ferramentas/cooking-equipment.png" style="width: 100px;" alt="Equipamentos_Ferramentas">
+                        <p>Equipamento de Hotelaria e Restauração</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/equiamentos_ferramentas/wip.png" style="width: 100px;" alt="Equipamentos_Ferramentas">
+                        <p>Equipamento e Materiais de Construção Civil</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/equiamentos_ferramentas/lathe-machine.png" style="width: 100px;" alt="Equipamentos_Ferramentas">
+                        <p>Equipamento Industrial</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/equiamentos_ferramentas/cash-register.png" style="width: 100px;" alt="Equipamentos_Ferramentas">
+                        <p>Equipamento para Lojas e Comércio</p>
+                    </a>                 
+                    
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    <div class="categorias" style="display: none;">
+        <div style="text-align:center;">
+            <h1>Categorias</h1>
+            <div class="imagens">
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/car.png" style="width: 100px;" alt="Carros, motos e barcos">
+                    <p>Carros, motos e barcos</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/new-house.png" style="width: 100px;" alt="Imóveis">
+                    <p>Imóveis</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/toys.png" style="width: 100px;" alt="Bebé e Criança">
+                    <p>Bebé e Criança</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/paddle.png" style="width: 100px;" alt="Lazer">
+                    <p>Lazer</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/smartphone.png" style="width: 100px;" alt="Telemóveis e Tablets">
+                    <p>Telemóveis e Tablets</p>
+                </a>
+
+
+
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/tractor.png" style="width: 100px;" alt="Agricultura">
+                    <p>Agricultura</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/pet.png" style="width: 100px;" alt="Animais">
+                    <p>Animais</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/sports.png" style="width: 100px;" alt="Desporto">
+                    <p>Desporto</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/wardrobe.png" style="width: 100px;" alt="Moda">
+                    <p>Moda</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/armchair.png" style="width: 100px;" alt="Móveis, Casa e Jardim">
+                    <p>Móveis, Casa e Jardim</p>
+                </a>
+
+
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/computer.png" style="width: 100px;" alt="Tecnologia">
+                    <p>Tecnologia</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/wrench.png" style="width: 100px;" alt="Equipamentos e Ferramentas">
+                    <p>Equipamentos e Ferramentas</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/menu.png" style="width: 100px;" alt="Outras Vendas">
+                    <p>Outras Vendas</p>
+                </a>
+
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/package.png" style="width: 100px;" alt="Todas as Vendas">
+                    <p>Todas as Vendas</p>
+                </a>
+
+               
+
+
+            </div>
+        </div>
+    </div>
+
+        </div>
+
+
+
+
+        <div class="imagens1">
+            <div class="IMG_principal">
+                <span>Imagem de Capa</span>
+                <div class="mb-4 d-flex justify-content-center">
+                    <img id="previewImage_0" src="~/imagens/icons/image.png" alt="example placeholder" style="width: 200px; border-radius:10px;" />
+                </div>
+                <div class="d-flex justify-content-center">
+                    <div class="carregar_Foto">
+                        <input type="file" onchange="carregarFoto(event, 0)" asp-for="FicheiroImagemDestaque" id="fileInput_0" style="display: none;" />
+                        <label for="fileInput_0">
+                            Carregar Foto
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder-symlink" viewBox="0 0 16 16">
+                                <path d="m11.798 8.271-3.182 1.97c-.27.166-.616-.036-.616-.372V9.1s-2.571-.3-4 2.4c.571-4.8 3.143-4.8 4-4.8v-.769c0-.336.346-.538.616-.371l3.182 1.969c.27.166.27.576 0 .742z" />
+                                <path d="m.5 3 .04.87a1.99 1.99 0 0 0-.342 1.311l.637 7A2 2 0 0 0 2.826 14h10.348a2 2 0 0 0 1.991-1.819l.637-7A2 2 0 0 0 13.81 3H9.828a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 6.172 1H2.5a2 2 0 0 0-2 2zm.694 2.09A1 1 0 0 1 2.19 4h11.62a1 1 0 0 1 .996 1.09l-.636 7a1 1 0 0 1-.996.91H2.826a1 1 0 0 1-.995-.91l-.637-7zM6.172 2a1 1 0 0 1 .707.293L7.586 3H2.19c-.24 0-.47.042-.683.12L1.5 2.98a1 1 0 0 1 1-.98h3.672z" />
+                            </svg>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            @for (int i = 1; i < 8; i++)
+            {
+                <div class="">
+                    <div class="mb-4 d-flex justify-content-center">
+                        <img id="previewImage_@i" src="~/imagens/icons/image.png" alt="example placeholder" style="width: 200px; border-radius:10px;" />
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <div class="carregar_Foto">
+                            <input type="file" onchange="carregarFoto(event, @i)" asp-for="FicheiroImagem" id="fileInput_@i" style="display: none;" />
+                            <label for="fileInput_@i">
+                                Carregar Foto
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder-symlink" viewBox="0 0 16 16">
+                                    <path d="m11.798 8.271-3.182 1.97c-.27.166-.616-.036-.616-.372V9.1s-2.571-.3-4 2.4c.571-4.8 3.143-4.8 4-4.8v-.769c0-.336.346-.538.616-.371l3.182 1.969c.27.166.27.576 0 .742z" />
+                                    <path d="m.5 3 .04.87a1.99 1.99 0 0 0-.342 1.311l.637 7A2 2 0 0 0 2.826 14h10.348a2 2 0 0 0 1.991-1.819l.637-7A2 2 0 0 0 13.81 3H9.828a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 6.172 1H2.5a2 2 0 0 0-2 2zm.694 2.09A1 1 0 0 1 2.19 4h11.62a1 1 0 0 1 .996 1.09l-.636 7a1 1 0 0 1-.996.91H2.826a1 1 0 0 1-.995-.91l-.637-7zM6.172 2a1 1 0 0 1 .707.293L7.586 3H2.19c-.24 0-.47.042-.683.12L1.5 2.98a1 1 0 0 1 1-.98h3.672z" />
+                                </svg>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div id="decricao" class="form-group" style="justify-content:center;">
+            <textarea class="form-control" asp-for="descricao" id="exampleFormControlTextarea1" placeholder="Descrição" rows="3"></textarea>
+        </div>
+
+        <div id="localizacao1" style="justify-content:center;">
+
+            <div class="input-group mb-3">
+
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Localização</span>
+                </div>
+
+                <input type="text" class="form-control" placeholder="Freguesia ou código postal" aria-label="Username" aria-describedby="basic-addon1" id="inputLocalizacao">
+                <input type="hidden" asp-for="localizacao" id="inputLocalizacaoNome">
+                <input type="hidden" asp-for="coordenadas" id="inputCoordenadas">
+
+            </div>
+
+            <!-- Container para o mapa e a lista de resultados -->
+            <div class="row">
+
+                <div class="col-md-6">
+                    <h3>Resultados de pesquisa</h3>
+                    <hr>
+                    <div id="resultadoPesquisa"></div>
+                </div>
+
+                <div class="col-md-6">
+                    <div id="map" style="height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dados_contacto" style="justify-content:center;">
+            <h1>Dados de contacto</h1>
+            <div class="input-group mb-3">
+
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Email</span>
+                </div>
+
+                <input type="text" asp-for="Email" class="form-control" placeholder="example@gmail.com" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+            <div class="input-group mb-3">
+
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Telemóvel</span>
+                </div>
+
+                <input type="text" asp-for="Telemovel" class="form-control" placeholder="000 000 000" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+        </div>
+
+        <div class="validacao" style="justify-content:center;">
+            <button type="submit" name="SubmitButton" value="publicar" class="bottun_publicar">
+                Públicar anúncio
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send" viewBox="0 0 16 16">
+                    <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z" />
+                </svg>
+
+            </button>
+
+        </div>
+    </form>
+</div>
+
+
+
+
+
+
+
+@section Scripts {
+    <script>
+        var i = 0;
+        var selecionada = ""; // Inicialmente, a variável está vazia
+
+
+        // Evento de clique no botão "Categorias"
+        document.getElementById("mostrarCategorias").addEventListener("click", function () {
+            var categoriasDiv = document.querySelector(".categorias");
+            var subcategoriasDiv = document.querySelector(".Sub-categorias");
+            // Alternar a exibição das categorias
+            if (categoriasDiv.style.display === "none") {
+                categoriasDiv.style.display = "block";
+
+                subcategoriasDiv.style.display = "none";
+            } else {
+                categoriasDiv.style.display = "none";
+
+            }
+        });
+        // Evento de clique no botão "Subcategorias"
+     document.getElementById("mostrarSubcategorias").addEventListener("click", function () {
+        var subcategoriasDiv = document.querySelector(".Sub-categorias");
+        var subcategoriasCarros = document.querySelector(".carros");
+        var subcategoriasImoveis = document.querySelector(".imoveis");
+        var subcategoriasbebe = document.querySelector(".Bebe_Crianca");
+        var subcategoriaslazer = document.querySelector(".lazer");
+         var subcategoriasTelemoveis_Tablets = document.querySelector(".Telemoveis_Tablets");
+          var subcategoriasAgricultura = document.querySelector(".Agricultura");
+            var subcategoriasAnimais = document.querySelector(".Animais");
+             var subcategoriasDesporto = document.querySelector(".Desporto");
+             var subcategoriasModa = document.querySelector(".Moda");
+              var subcategoriasMoveis_Casa_Jardim = document.querySelector(".Moveis_Casa_Jardim");
+              var subcategoriasTecnologia = document.querySelector(".Tecnologia");
+               var subcategoriasEquipamentos_Ferramentas = document.querySelector(".Equipamentos_Ferramentas");
+
+
+             
+        if (subcategoriasDiv.style.display === "none" && i == 1) {
+            subcategoriasDiv.style.display = "block";
+
+            if (selecionada === "Carros, motos e barcos") {
+                subcategoriasCarros.style.display = "block";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";
+                subcategoriaslazer.style.display = "none";    
+                subcategoriasTelemoveis_Tablets.style.display = "none";       
+                subcategoriasAgricultura.style.display = "none";        
+                subcategoriasAnimais.style.display = "none";       
+                subcategoriasDesporto.style.display = "none";            
+                subcategoriasModa.style.display = "none";
+                subcategoriasMoveis_Casa_Jardim.style.display = "none"; 
+                subcategoriasTecnologia.style.display = "none"; 
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                                  
+             
+            } else if (selecionada === "Imóveis") {
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "block";
+                subcategoriasbebe.style.display = "none";
+                subcategoriaslazer.style.display = "none";    
+                subcategoriasTelemoveis_Tablets.style.display = "none";       
+                subcategoriasAgricultura.style.display = "none";        
+                subcategoriasAnimais.style.display = "none";       
+                subcategoriasDesporto.style.display = "none";             
+                subcategoriasModa.style.display = "none"; 
+                subcategoriasMoveis_Casa_Jardim.style.display = "none"; 
+                subcategoriasTecnologia.style.display = "none"; 
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                                  
+             
+            }
+            else if (selecionada === "Bebé e Criança") {
+                subcategoriasbebe.style.display = "block";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriaslazer.style.display = "none";    
+                subcategoriasTelemoveis_Tablets.style.display = "none";       
+                subcategoriasAgricultura.style.display = "none";        
+                subcategoriasAnimais.style.display = "none";       
+                subcategoriasDesporto.style.display = "none";            
+                subcategoriasModa.style.display = "none"; 
+                subcategoriasMoveis_Casa_Jardim.style.display = "none";  
+                subcategoriasTecnologia.style.display = "none";  
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                                
+             
+            }
+            else if (selecionada === "Lazer") {
+                subcategoriaslazer.style.display = "block";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";                
+                subcategoriasTelemoveis_Tablets.style.display = "none";       
+                subcategoriasAgricultura.style.display = "none";        
+                subcategoriasAnimais.style.display = "none";       
+                subcategoriasDesporto.style.display = "none";            
+                subcategoriasModa.style.display = "none";
+                subcategoriasMoveis_Casa_Jardim.style.display = "none";  
+                subcategoriasTecnologia.style.display = "none";
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                                  
+             
+            }
+             else if (selecionada === "Telemóveis e Tablets") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "block";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";               
+                subcategoriasAgricultura.style.display = "none";        
+                subcategoriasAnimais.style.display = "none";       
+                subcategoriasDesporto.style.display = "none";             
+                subcategoriasModa.style.display = "none";  
+                subcategoriasMoveis_Casa_Jardim.style.display = "none"; 
+                subcategoriasTecnologia.style.display = "none";    
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                               
+             
+            }
+            else if (selecionada === "Agricultura") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "block";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";              
+                subcategoriasAnimais.style.display = "none";       
+                subcategoriasDesporto.style.display = "none";           
+                subcategoriasModa.style.display = "none"; 
+                subcategoriasMoveis_Casa_Jardim.style.display = "none"; 
+                subcategoriasTecnologia.style.display = "none";  
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                                 
+             
+            } 
+            else if (selecionada === "Animais") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "none";                
+                subcategoriasAnimais.style.display = "block";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";              
+                subcategoriasDesporto.style.display = "none";            
+                subcategoriasModa.style.display = "none";
+                subcategoriasMoveis_Casa_Jardim.style.display = "none"; 
+                subcategoriasTecnologia.style.display = "none";                                   
+             
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";
+                
+            }
+            
+            else if (selecionada === "Desporto") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "none";                
+                subcategoriasDesporto.style.display = "block";                              
+                subcategoriasAnimais.style.display = "none";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";             
+                subcategoriasModa.style.display = "none";
+                subcategoriasMoveis_Casa_Jardim.style.display = "none"; 
+                subcategoriasTecnologia.style.display = "none"; 
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                                  
+              
+            }
+            else if (selecionada === "Moda") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "none";                
+                subcategoriasDesporto.style.display = "none";               
+                subcategoriasModa.style.display = "block";                                 
+                subcategoriasAnimais.style.display = "none";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";  
+                subcategoriasMoveis_Casa_Jardim.style.display = "none";  
+                subcategoriasTecnologia.style.display = "none";     
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                             
+             
+            }
+            else if (selecionada === "Móveis, Casa e Jardim") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "none";                
+                subcategoriasDesporto.style.display = "none";               
+                subcategoriasModa.style.display = "none";              
+                subcategoriasMoveis_Casa_Jardim.style.display = "block";                                   
+                subcategoriasAnimais.style.display = "none";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";        
+                subcategoriasTecnologia.style.display = "none";
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";
+            }
+             else if (selecionada === "Tecnologia") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "none";                
+                subcategoriasDesporto.style.display = "none";               
+                subcategoriasModa.style.display = "none";                 
+                subcategoriasTecnologia.style.display = "block";
+                subcategoriasMoveis_Casa_Jardim.style.display = "none";                                   
+                subcategoriasAnimais.style.display = "none";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";
+             
+            }
+             else if (selecionada === "Equipamentos e Ferramentas") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "none";                
+                subcategoriasDesporto.style.display = "none";               
+                subcategoriasModa.style.display = "none";                 
+                subcategoriasTecnologia.style.display = "none";                         
+                subcategoriasEquipamentos_Ferramentas.style.display = "block";
+                subcategoriasMoveis_Casa_Jardim.style.display = "none";                                   
+                subcategoriasAnimais.style.display = "none";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";
+            }
+         
+        } else {
+            subcategoriasDiv.style.display = "none";
+        }
+    });
+      // Evento de clique no botão "Remover"
+        const categoriaLinks = document.querySelectorAll(".categorias a");
+
+        categoriaLinks.forEach(function (link) {
+            link.addEventListener("click", function () {
+                var categoriaSelecionada = link.querySelector("p").textContent;
+                var categoriaTexto = document.getElementById("categoria-texto");
+                var categoriaSelecionadaDiv = document.querySelector(".categoria-selecionada");
+
+                categoriaTexto.textContent = categoriaSelecionada;
+                document.getElementById("input_Categoria").value = categoriaSelecionada;
+                categoriaSelecionadaDiv.style.display = "block";
+                // Ocultar a <div> de categorias quando uma categoria é selecionada
+                var categoriasDiv = document.querySelector(".categorias");
+                categoriasDiv.style.display = "none";
+
+                var subcategoriaTexto = document.getElementById("subcategoria-texto");
+                subcategoriaTexto.textContent = "";
+                document.querySelector(".subcategoria-selecionada").style.display = "none";
+                i = 1;
+            });
+        });
+
+        // Evento de clique no botão "Remover"
+        document.getElementById("removerCategoria").addEventListener("click", function () {
+            var subcategoriasDiv = document.querySelector(".Sub-categorias");
+            var categoriaTexto = document.getElementById("categoria-texto");
+            categoriaTexto.textContent = "";
+
+            document.getElementById("input_Categoria").value = "";
+            document.querySelector(".categoria-selecionada").style.display = "none";
+            subcategoriasDiv.style.display = "none";
+            var subcategoriaTexto = document.getElementById("subcategoria-texto");
+            subcategoriaTexto.textContent = "";
+            document.querySelector(".subcategoria-selecionada").style.display = "none";
+            i = 0;
+        });
+
+
+        const subcategoriaLinks = document.querySelectorAll(".Sub-categorias a");
+
+        subcategoriaLinks.forEach(function (link) {
+            link.addEventListener("click", function () {
+                var subcategoriaSelecionada = link.querySelector("p").textContent;
+                var subcategoriaTexto = document.getElementById("subcategoria-texto");
+                var subcategoriaSelecionadaDiv = document.querySelector(".subcategoria-selecionada");
+
+                subcategoriaTexto.textContent = subcategoriaSelecionada;
+                document.getElementById("input_SubCategoria").value = subcategoriaSelecionada;
+                subcategoriaSelecionadaDiv.style.display = "block";
+                // Ocultar a <div> de categorias quando uma categoria é selecionada
+                var SubcategoriasDiv = document.querySelector(".Sub-categorias");
+                SubcategoriasDiv.style.display = "none";
+            });
+        });
+
+
+
+        // Evento de clique no botão "Remover" subcategoria
+        document.getElementById("removerSubcategoria").addEventListener("click", function () {
+            var subcategoriaTexto = document.getElementById("subcategoria-texto");
+            subcategoriaTexto.textContent = "";
+            document.getElementById("input_SubCategoria").value = "";
+
+            document.querySelector(".subcategoria-selecionada").style.display = "none";
+        });
+
+        categoriaLinks.forEach(function (link) {
+            link.addEventListener("click", function () {
+                var categoriaSelecionada = link.querySelector("p").textContent;
+                var categoriaTexto = document.getElementById("categoria-texto");
+                var categoriaSelecionadaDiv = document.querySelector(".categoria-selecionada");
+
+                categoriaTexto.textContent = categoriaSelecionada;
+                categoriaSelecionadaDiv.style.display = "block";
+
+                // Armazene a categoria selecionada na variável
+                selecionada = categoriaTexto.textContent;
+                i = 1;
+            });
+        });
+
+
+    </script>
+    <script>
+        function carregarFoto(event, index) {
+            var input = event.target;
+            var previewImage = document.getElementById("previewImage_" + index);
+
+            console.log("Input element:", input);
+            console.log("Preview image element:", previewImage);
+
+            var reader = new FileReader();
+            reader.onload = function () {
+                previewImage.src = reader.result;
+            };
+
+            if (input.files && input.files[0]) {
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+    </script>
+
+
+    <script>
+        var map = L.map('map').setView([39.5, -8], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        function adicionarMarcador(lat, lon, nomeLocalizacao) {
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            L.marker([lat, lon]).addTo(map);
+
+            map.setView([lat, lon], 14);
+
+            // Atualizar os campos de entrada
+            document.getElementById('inputLocalizacao').value = nomeLocalizacao;
+            document.getElementById('inputLocalizacaoNome').value = nomeLocalizacao;
+            document.getElementById('inputCoordenadas').value = lat + ',' + lon;
+        }
+
+        document.getElementById('inputLocalizacao').addEventListener('input', function () {
+            var localizacao = this.value;
+
+            fetch(`https://nominatim.openstreetmap.org/search?q=${localizacao}&format=json&countrycodes=PT`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('resultadoPesquisa').innerHTML = '';
+
+                    data.forEach(result => {
+                        var resultadoItem = document.createElement('a');
+                        resultadoItem.innerHTML = result.display_name;
+                        resultadoItem.addEventListener('click', function () {
+                            adicionarMarcador(result.lat, result.lon, result.display_name);
+                        });
+
+                        document.getElementById('resultadoPesquisa').appendChild(resultadoItem);
+                    });
+                });
+        });
+    </script>
+
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

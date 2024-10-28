@@ -1,0 +1,383 @@
+﻿    @using Microsoft.AspNetCore.Identity
+    @using Microsoft.EntityFrameworkCore
+    @using Tradeguard2.Data
+    @using Tradeguard2.Helpers
+    @inject UserManager<ApplicationUser> UserManager
+    @inject ApplicationDbContext ApplicationDbContext
+    @{
+        ViewData["Title"] = "Lista_Users";
+
+    }
+
+    @{
+        var mediaQuery = @"
+            @media only screen and (min-width: 601px) and (max-width: 960px) {
+               .table{
+                        width: 100%;
+                        overflow-x: auto;
+                        display:block;
+                     }
+            }
+        ";
+          var mediaQuery1 = @"
+            @media only screen and (max-width: 600px) {
+                .table{
+                        width: 100%;
+                        overflow-x: auto;
+                        display:block;
+                     }
+            }
+        ";
+    }
+
+    @section Style {
+        <style>
+        
+            .Card{
+                background-color: white;
+                    transition: transform 0.2s;
+                    box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                    -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+                    -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                    border-radius: 10px;
+                    padding: 15px;
+                    margin-top: 15px;
+                    margin-bottom: 10px;
+            }
+
+            .Tabela_Users{
+                    background-color: white;
+                    transition: transform 0.2s;
+                    box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                    -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+                    -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                    border-radius: 10px;
+                    padding: 15px;
+                    margin-top: 15px;
+                    margin-bottom: 10px;
+            }
+             .checked {
+                color: orange;
+            }   
+            .lista_Top{
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 25px;
+                justify-content: center;   
+            }
+            @Html.Raw(mediaQuery)    
+            @Html.Raw(mediaQuery1)
+      </style>
+       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+ 
+    }
+
+
+    <div class="Tabela_Users">
+
+          <div style="display: flex;flex-direction: row;gap: 10px;">
+        <select id="estado_proposta" class="form-select" onchange="getUsers()">
+                    <option value="Todos">Todos</option>
+            <option value="Melhores Avaliados">Melhores Avaliados</option>
+            <option value="Mais Vendas">Mais Vendas</option>
+            <option value="Mais Elogios">Mais Elogios</option>
+            <option value="Menos Elogios">Menos Elogios</option>
+            <option value="Menos Vendas">Menos Vendas</option>
+            <option value="Piores Avaliados">Piores Avaliações</option>
+        </select>
+
+
+         
+          <input type="text" id="search_input" class="form-control" placeholder="Pesquisar ID do Anúncio ou ID da proposta" onkeyup="getUsers()">
+
+
+        </div>
+        @{
+           var utilizadores = await UserManager.GetUsersInRoleAsync("Utilizador");
+
+
+        }
+        <table id="tabela-users" class="table">
+            <thead>
+                <tr>
+                    <th>Id Utilizador</th>
+                    <th>CC Utilizador</th>
+                    <th>Nome Utilizador</th>
+                    <th>Telemóvel Utilizador</th>
+                    <th>Email Utilizador</th>
+                    <th>Avaliação Utilizador</th>
+                    <th>Imagem de Perfil</th>
+                    <th>Saldo Utilizador</th>
+                </tr>
+            </thead>
+            <tbody>
+            
+                @if (!utilizadores.Any())
+                {
+                    <tr>
+                        <td colspan="3" class="text-center">Não há propostas de anúncios disponíveis.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var user1 in utilizadores)
+                    {
+                  
+                        <tr>
+                            <td>@user1.Id</td>
+                            <td>@user1.CC</td>
+                            <td>@user1.Nome</td>
+                            <td>@user1.Telemovel</td>
+                            <td>@user1.Email</td>
+                            <td>
+                        
+                                @{
+                                    Decimal avaliacaoMedia = Convert.ToDecimal(user1.Avaliacao);
+                                }
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <span class="fa @(i <= Math.Ceiling(avaliacaoMedia) ? "fa-star checked" : "fa-star")"></span>
+                                }                      
+                        
+                            </td>
+                            <td>
+                               <img src="@(await GetUserAvatarUrlAsync(user1.Id))" alt="User Avatar" class="user-avatar">
+                            </td>
+                            <td>@user1.Saldo €</td>
+                        
+                        </tr>
+                    }
+                }
+  
+ 
+
+              
+
+             
+            </tbody>
+
+        </table>
+
+          <div id="loading" class="loader">
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--text"></div>
+        </div>
+
+    
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+
+
+
+    </div>
+    <div class="lista_Top">
+        @{
+            var propostas = await ApplicationDbContext.PropostasDeCompra.Where(p => p.Venda_Concluida == true).ToListAsync();
+            var user =await ApplicationDbContext.Users.ToListAsync();
+            var utilizadoresComPropostasConcluidas = new List<string>();
+            var utilizadoresComN_Vendas = new Dictionary<string, int>();
+            var utilizadoresOrdenados = new List<ApplicationUser>();
+
+            foreach (var utilizador in user)
+            {
+                var userCC = utilizador.CC;
+                var eVendedor = propostas.Any(p => p.CC_vendedor == userCC);
+                if (eVendedor)
+                {
+                    utilizadoresComPropostasConcluidas.Add(utilizador.CC);
+                }
+            }
+
+            foreach (var utilizador1 in utilizadoresComPropostasConcluidas)
+            {
+                if (!utilizadoresComN_Vendas.ContainsKey(utilizador1))
+                {
+                    var N_Vendas = propostas.Count(p => p.CC_vendedor == utilizador1);
+                    utilizadoresComN_Vendas.Add(utilizador1, N_Vendas);
+                }
+            }
+
+
+            utilizadoresComN_Vendas = utilizadoresComN_Vendas.OrderByDescending(p => p.Value).ToDictionary(kv => kv.Key, kv => kv.Value);
+
+
+            foreach (var utilizadorFinal in utilizadoresComN_Vendas)
+            {
+                var user1234 = ApplicationDbContext.Users.FirstOrDefault(p => p.CC == utilizadorFinal.Key);
+                if (user1234 != null)
+                {
+                    utilizadoresOrdenados.Add(user1234);
+                }
+            }
+            var userlogin = UserManager.GetUserAsync(User).Result.Id;
+            var melhorUtilizador = utilizadoresOrdenados.Where(u => u.Id != userlogin).FirstOrDefault();
+            var MelhorAvaliado = user.OrderByDescending(u => u.Avaliacao).Where(u => u.Id != userlogin).FirstOrDefault();
+            var PiorAvaliado = user.OrderBy(u => u.Avaliacao).Where(u => u.Id != userlogin).FirstOrDefault();
+    }
+    @if (melhorUtilizador != null)
+    {
+        <div class="Top_Cards">
+            <div class="Card" style="max-width:20rem;">
+                <h3>Melhor Vendedor</h3>
+                <div class="imgProduto">
+                    <img class="card-img-top" style="border-radius:10px;max-height: 250px;" src="@(await GetUserAvatarUrlAsync(melhorUtilizador.Id))" alt="Imagem do Produto" asp-append-version="true" />
+                </div>
+                <div class="card-body">
+                    <p id="Nome">@melhorUtilizador.Nome</p>
+                    <p id="Email">@melhorUtilizador.Email</p>
+
+                    @{
+                        Decimal avaliacaoMedia = Convert.ToDecimal(melhorUtilizador.Avaliacao);
+                    }
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <span class="fa @(i <= Math.Ceiling(avaliacaoMedia) ? "fa-star checked" : "fa-star")"></span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    @if (MelhorAvaliado != null )
+    {
+        <div class="Top_Cards">
+            <div class="Card" style="max-width:20rem;">
+                <h3>Melhor Avaliado</h3>
+                <div class="imgProduto">
+                    <img class="card-img-top" style="border-radius:10px;max-height: 250px;" src="@(await GetUserAvatarUrlAsync(MelhorAvaliado.Id))" alt="Imagem do Produto" asp-append-version="true" />
+                </div>
+                <div class="card-body">
+                    <p id="Nome">@MelhorAvaliado.Nome</p>
+                    <p id="Email">@MelhorAvaliado.Email</p>
+
+                    @{
+                        Decimal avaliacaoMedia = Convert.ToDecimal(MelhorAvaliado.Avaliacao);
+                    }
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <span class="fa @(i <= Math.Ceiling(avaliacaoMedia) ? "fa-star checked" : "fa-star")"></span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    @if (PiorAvaliado != null)
+    {
+        <div class="Top_Cards">
+            <div class="Card" style="max-width:20rem;">
+                <h3>Pior Avaliado</h3>
+                <div class="imgProduto">
+                    <img class="card-img-top" style="border-radius:10px;max-height: 250px;" src="@(await GetUserAvatarUrlAsync(PiorAvaliado.Id))" alt="Imagem do Produto"  />
+                </div>
+                <div class="card-body">
+                    <p id="Nome">@PiorAvaliado.Nome</p>
+                    <p id="Email">@PiorAvaliado.Email</p>
+
+                    @{
+                        Decimal avaliacaoMedia = Convert.ToDecimal(PiorAvaliado.Avaliacao);
+                    }
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <span class="fa @(i <= Math.Ceiling(avaliacaoMedia) ? "fa-star checked" : "fa-star")"></span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    </div>
+
+     @functions {
+        public async Task<string> GetUserAvatarUrlAsync(string userId)
+        {
+            var user = await ApplicationDbContext.Users.FirstOrDefaultAsync(p => p.Id == userId);
+            if (user != null && user.ProfilePicture != null && user.ProfilePicture.Length > 0)
+            {
+                var base64String = Convert.ToBase64String(user.ProfilePicture);
+                return $"data:image/jpeg;base64,{base64String}";
+            }
+
+            return "/path/to/default/avatar.png";
+        }
+    }
+
+    @section Scripts {
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script>
+
+         function getUsers() {
+          var searchTerm = document.getElementById("search_input").value;
+    var tipo = document.getElementById("estado_proposta").value;
+
+    $.ajax({
+        url: '/Admin/GetUsers',
+        type: 'GET',
+        dataType: 'json',
+        data: { searchTerm: searchTerm, Tipo: tipo },
+        success: function (data) {
+            console.log(data);
+            $('#tabela-users tbody').empty();
+            $.each(data, function (index, user) {
+                var row = '<tr>' +
+                    '<td>' + user.id + '</td>' +
+                    '<td>' + user.cc + '</td>' +
+                    '<td>' + user.nome + '</td>' +
+                    '<td>' + user.telemovel + '</td>' +
+                    '<td>' + user.email + '</td>' +
+                    '<td>';
+
+                for (var i = 1; i <= 5; i++) {
+                    if (i <= Math.ceil(user.avaliacao)) {
+                        row += '<span class="fa fa-star checked"></span>';
+                    } else {
+                        row += '<span class="fa fa-star"></span>';
+                    }
+                }
+
+                var imageUrl = user.avatarUrl;
+
+                row += '</td>' +
+                    '<td><img src="' + imageUrl + '" alt="User Avatar" class="user-avatar"></td>' +
+                    '<td>' + user.saldo + '€</td>' +
+                    '</tr>';
+                console.log(imageUrl);
+                $('#tabela-users tbody').append(row);
+                console.log(row);
+            });
+        },
+        error: function (error,xhr) {
+            console.log(error);
+               console.log(xhr);
+        }
+    });
+
+        }
+
+            // Função para mostrar o loading
+            function showLoading() {
+                $('#loading').show();
+            }
+
+            // Função para ocultar o loading
+            function hideLoading() {
+                $('#loading').hide();
+            }
+
+            // Mostrar o loading ao iniciar o carregamento da página
+            $(document).ready(function () {
+                showLoading();
+            });
+
+            // Ocultar o loading quando todos os recursos da página foram carregados
+            $(window).on('load', function () {
+                hideLoading();
+            });
+        </script>
+    }
+
+

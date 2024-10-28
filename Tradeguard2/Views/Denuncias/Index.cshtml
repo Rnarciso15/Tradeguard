@@ -1,0 +1,379 @@
+﻿    @model IEnumerable<Tradeguard2.Models.Denuncias>
+    @using Microsoft.AspNetCore.Identity
+    @using Microsoft.EntityFrameworkCore
+    @using Tradeguard2.Data
+    @using Tradeguard2.Helpers
+    @using Tradeguard2.Helpers
+    @inject UserManager<ApplicationUser> UserManager
+    @inject ApplicationDbContext ApplicationDbContext
+    @{
+        ViewData["Title"] = "Index";
+        var mediaQuery1 = @" @media screen and (max-width: 960px) {
+                #div_geral {
+                    padding: 20px;
+                }
+
+                .organizar_input_dropdown {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .Div_PDF,
+                .input_pesquisa,
+                #dropdown_registo {
+                    margin-top: 10px;
+                    margin-bottom: 10px;
+                }
+
+                table.dataTable thead .sorting:after,
+                table.dataTable thead .sorting:before,
+                table.dataTable thead .sorting_asc:after,
+                table.dataTable thead .sorting_asc:before,
+                table.dataTable thead .sorting_asc_disabled:after,
+                table.dataTable thead .sorting_asc_disabled:before,
+                table.dataTable thead .sorting_desc:after,
+                table.dataTable thead .sorting_desc:before,
+                table.dataTable thead .sorting_desc_disabled:after,
+                table.dataTable thead .sorting_desc_disabled:before {
+                    bottom: 0.5em;
+                }
+    table {
+        width: 100%;
+        overflow-x: auto;
+        display: block; 
+    }
+                .table th,
+                .table td {
+                    font-size: 12px;
+                    white-space: nowrap; /* Prevent line break in table cells */
+                }
+
+                .table-responsive {
+                    overflow-x: auto; /* Add horizontal scroll to the table on small screens */
+                }
+            }
+        ";
+    }
+
+
+    @section Style {
+        <style>
+
+            table.dataTable thead .sorting:after,
+            table.dataTable thead .sorting:before,
+            table.dataTable thead .sorting_asc:after,
+            table.dataTable thead .sorting_asc:before,
+            table.dataTable thead .sorting_asc_disabled:after,
+            table.dataTable thead .sorting_asc_disabled:before,
+            table.dataTable thead .sorting_desc:after,
+            table.dataTable thead .sorting_desc:before,
+            table.dataTable thead .sorting_desc_disabled:after,
+            table.dataTable thead .sorting_desc_disabled:before {
+                bottom: .5em;
+            }
+
+            .div_tabela {
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+
+            #botao_pesquisar {
+                color: white;
+                background-color: #112647;
+                border-color: white;
+                border-radius: 10px;
+                border-width: 2px;
+                border-style: solid;
+            }
+
+                #botao_pesquisar:hover {
+                    color: #112647;
+                    background-color: white;
+                    border-color: #112647;
+                    border-radius: 10px;
+                    border-width: 2px;
+                    border-style: solid;
+                }
+
+            .organizar_input_dropdown {
+                display: flex;
+                flex-direction: row;
+                justify-content: end;
+                margin-top: 20px;
+                     width: 100%;
+            }
+
+            #dropdown_registo {
+                margin-left: 10px;
+            }
+
+            #button_drop {
+                color: #112647;
+                background-color: white;
+                border-color: #112647;
+                border-radius: 10px;
+                border-width: 2px;
+                border-style: solid;
+            }
+
+            .Div_PDF {
+                color: #112647;
+                background-color: white;
+                border-color: #112647;
+                border-radius: 10px;
+                border-width: 2px;
+                border-style: solid;
+                text-align: center;
+                padding: 5px;
+            }
+
+            .input_pesquisa {
+                margin-left: 10px;            
+                display: flex;
+            }
+
+            #div_geral {
+                background-color: white;
+                box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+               -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+                -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                border-radius: 10px;
+                padding: 50px;
+                padding-left: 100px;
+                padding-right: 100px;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+             table {
+            width: 100%;
+            overflow-x: auto;
+        }
+                    @Html.Raw(mediaQuery1)
+        </style>
+    }
+
+
+    <div id="div_geral" class="text-center">
+    <h1>Histórico de Denúncias</h1>
+
+ 
+    <div class="organizar_input_dropdown">
+
+          <!-- Botão PDF -->
+            <div class="">
+                <button id="btnGerarPDF" class="Div_PDF">
+                    PDF
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filetype-pdf" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5ZM1.6 11.85H0v3.999h.791v-1.342h.803c.287 0 .531-.057.732-.173.203-.117.358-.275.463-.474a1.42 1.42 0 0 0 .161-.677c0-.25-.053-.476-.158-.677a1.176 1.176 0 0 0-.46-.477c-.2-.12-.443-.179-.732-.179Zm.545 1.333a.795.795 0 0 1-.085.38.574.574 0 0 1-.238.241.794.794 0 0 1-.375.082H.788V12.48h.66c.218 0 .389.06.512.181.123.122.185.296.185.522Zm1.217-1.333v3.999h1.46c.401 0 .734-.08.998-.237a1.45 1.45 0 0 0 .595-.689c.13-.3.196-.662.196-1.084 0-.42-.065-.778-.196-1.075a1.426 1.426 0 0 0-.589-.68c-.264-.156-.599-.234-1.005-.234H3.362Zm.791.645h.563c.248 0 .45.05.609.152a.89.89 0 0 1 .354.454c.079.201.118.452.118.753a2.3 2.3 0 0 1-.068.592 1.14 1.14 0 0 1-.196.422.8.8 0 0 1-.334.252 1.298 1.298 0 0 1-.483.082h-.563v-2.707Zm3.743 1.763v1.591h-.79V11.85h2.548v.653H7.896v1.117h1.606v.638H7.896Z" />
+                    </svg>
+                </button>
+            </div>
+
+
+    </div>
+    <table id="Tabela_denuncias"class="table">
+        <thead>
+            <tr>
+                <th class="th-sm">
+                    Nª da Denuncia
+                </th>
+                <th class="th-sm">
+                    Nª do Anuncio
+                </th>
+                <th class="th-sm">
+                    Data
+                </th>
+                <th class="th-sm">
+                    Tipo de Denuncia
+                </th>
+                <th class ="th-sm">
+                    Subtipo de Denuncia
+                </th>
+                <th class="th-sm">
+                    Nº do Anunciador
+                </th>
+                  <th class="th-sm">
+                    Nº do Denunciador
+                </th>
+            </tr>
+        </thead>
+        @{
+              var userLoginId = await UserManager.GetUserAsync(User);
+            var denuncias = await ApplicationDbContext.Denuncias
+            .Where(p => p.CC_anunciador == userLoginId.CC || p.CC_denunciador == userLoginId.CC)
+            .ToListAsync();
+        }
+          @if (denuncias.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Id_Denuncia)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Id_Anuncio)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Data)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Tipo)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.SubTipo)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CC_anunciador)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CC_denunciador)
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">Ainda não existem denúncias.</td>
+                    </tr>
+                }
+            </tbody>
+        <tfoot>
+            <tr>
+
+                <th>
+                    Nª da Denuncia
+                </th>
+
+                <th>
+                    Nº do Anuncio
+                </th>
+                <th>
+                    Data
+                </th>
+                <th>
+                    Tipo de Denuncia
+                </th>
+                <th>
+                    Subtipo de Denuncia
+                </th>
+                <th>
+                    Nº do Anunciador
+                </th>
+                    <th>
+                        Nº do Denunciador
+                    </th>
+
+            </tr>
+        </tfoot>    
+    </table>
+    </div>
+    @section Scripts {
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+        <script>
+
+              function formatarData(data) {
+        // Formatar a data para o formato desejado (por exemplo: dd/mm/yyyy hh:mm:ss)
+        var dataObj = new Date(data);
+        var dia = dataObj.getDate();
+        var mes = dataObj.getMonth() + 1; // Os meses começam do zero
+        var ano = dataObj.getFullYear();
+        var hora = dataObj.getHours();
+        var minutos = dataObj.getMinutes();
+        var segundos = dataObj.getSeconds();
+
+        // Garantir que o dia, mês, hora, minutos e segundos tenham dois dígitos
+        if (dia < 10) {
+            dia = '0' + dia;
+        }
+        if (mes < 10) {
+            mes = '0' + mes;
+        }
+        if (hora < 10) {
+            hora = '0' + hora;
+        }
+        if (minutos < 10) {
+            minutos = '0' + minutos;
+        }
+        if (segundos < 10) {
+            segundos = '0' + segundos;
+        }
+
+        // Retornar a data formatada como uma string
+        return dia + '/' + mes + '/' + ano + ' ' + hora + ':' + minutos + ':' + segundos;
+    }
+     function gethistorico() {
+        var texto = document.getElementById("texto").value;
+        $.ajax({
+            url: '/Denuncias/GetanunciosByInput',
+            type: 'GET',
+            dataType: 'json',
+            data: { texto: texto },
+       success: function (data) {
+        $('#Tabela_denuncias tbody').empty();
+    
+        $.each(data, function (index, item) {
+      
+            var dataFormatada = formatarData(item.data);
+            $('#Tabela_denuncias tbody').append(
+                '<tr>' +
+                '<td>' + item.id_Denuncia + '</td>' +
+                '<td>' + item.id_Anuncio + '</td>' +
+                '<td>' + dataFormatada + '</td>' +
+                 '<td>' + item.tipo + '</td>' +
+                '<td>' + item.subTipo + '</td>' +
+                '<td>' + item.cC_anunciador + '</td>' +
+                '<td>' + item.cC_denunciador + '</td>' +
+                '</tr>'
+            );
+        });
+    },
+        error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    }
+
+ // Adicione o evento click para o botão PDF
+// Adicione o evento click para o botão PDF
+document.getElementById('btnGerarPDF').addEventListener('click', function () {
+    // Oculta a div 'organizar_input_dropdown'
+    var element1 = document.getElementsByClassName('organizar_input_dropdown')[0];
+    element1.style.display = "none";
+
+    // Selecione apenas a tabela e seu título
+    var element = document.getElementById('div_geral');
+
+    // Opções de configuração do PDF
+   var opt = {
+    margin: 0.5,
+    filename: 'historico_Denuncias.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }, // Altere a orientação para landscape
+    // Após a conversão, mostra novamente a div 'organizar_input_dropdown'
+    onAfterSave: function () {
+        element1.style.display = "flex";
+    }
+};
+
+    // Adicione o logo da sua empresa
+    var logo = new Image();
+    logo.src = '~/imagens/logo.png'; // Substitua '~/imagens/logo.png' pelo caminho real do logo
+    var logoWidth = 2; // Largura do logo em polegadas
+    var logoHeight = (logo.height * logoWidth) / logo.width; // Altura proporcional ao logoWidth
+    opt.jsPDF.autotable = { startY: 0, margin: { top: 0.5 }, addPageContent: function (data) {
+        data.doc.addImage(logo, 'PNG', data.settings.margin.left, data.settings.margin.top, logoWidth, logoHeight);
+    }};
+
+    // Converter o elemento em PDF
+    html2pdf().from(element).set(opt).save().then(() => {
+        // Exiba a div 'organizar_input_dropdown' após a geração do PDF
+        element1.style.display = "flex";
+    });
+});
+
+    
+        </script>
+    }

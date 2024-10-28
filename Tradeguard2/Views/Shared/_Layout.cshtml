@@ -1,0 +1,148 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using NToastNotify
+@using Tradeguard2.Data
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _context
+@inject IToastNotification _toastNotification;
+@inject SignInManager<ApplicationUser> SignInManager
+@using Microsoft.AspNetCore.Http
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Tradeguard</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" /><link rel="stylesheet" href="~/Tradeguard2.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.13/signalr.min.js"></script>
+    <link rel="shortcut icon" href="~/Imagens/Logo/escudo.ico" type="image/x-icon" />
+
+    @await RenderSectionAsync("Style", required: false)
+</head>
+<body>
+
+ 
+
+        <header>
+            <nav id="nav_bar" class="navbar navbar-expand-lg bg-body-tertiary">
+                <div id="Div_navbar" class="container-fluid">
+                    <a id="logo_name" class="navbar-brand" asp-action="Index" asp-controller="Home">
+                        <img src="~/Imagens/Logo/escudo.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                        TradeGuard
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+
+                        <span class="navbar-toggler-text">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
+                            </svg>
+                        </span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul id="conjunto_li" class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li id="Item_conjunto" class="nav-item">
+                                <a class="nav-link active" aria-current="page" asp-action="Index" asp-controller="Home">
+                                    Principal
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house" viewBox="0 0 16 16">
+                                        <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5ZM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5 5 5Z" />
+                                    </svg>
+                                </a>
+                            </li>
+                            <li id="Item_conjunto" class="nav-item">
+                                <a class="nav-link" asp-action="Index" asp-controller="Mensagens">
+                                    Mensagens
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-left" viewBox="0 0 16 16">
+                                        <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
+                                    </svg>
+                                </a>
+                            </li>
+                            <li id="Item_conjunto" class="nav-item">
+                                <a class="nav-link" asp-action="Index" asp-controller="Favoritos">
+                                    Favoritos
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                                        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                                    </svg>
+                                </a>
+                            </li>
+                            <li style="margin-left:20px;">
+                                <partial name="_LoginPartial" />
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <div class="container">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+
+        <footer id="footer_layout" class="border-top footer text-muted">
+
+            <div id="logo" class="col">
+                <img src="~/Imagens/Logo/escudo.png" alt="Logo" width="50" height="44" class="d-inline-block align-text-top">
+                TradeGuard
+            </div>
+
+            <div class="col">
+            </div>
+
+            <div id="seccoes" class="col">
+                <h5>Categorias:</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2"><a href="#" id="texto" class="nav-link p-0 text-muted">Carros, Motas e Barcos</a></li>
+                    <li class="nav-item mb-2"><a href="#" id="texto" class="nav-link p-0 text-muted">Imóveis</a></li>
+                    <li class="nav-item mb-2"><a href="#" id="texto" class="nav-link p-0 text-muted">Bebè e Criança</a></li>
+                    <li class="nav-item mb-2"><a href="#" id="texto" class="nav-link p-0 text-muted">Telemóveis e Tablets</a></li>
+                    <li class="nav-item mb-2"><a href="#" id="texto" class="nav-link p-0 text-muted">Agricultura</a></li>
+                </ul>
+            </div>
+
+            <div id="seccoes" class="col">
+                <h5>Categorias:</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2"><a href="#" id="texto" class="nav-link p-0 text-muted">Animais</a></li>
+                    <li class="nav-item mb-2"><a href="#" id="texto" class="nav-link p-0 text-muted">Desporto</a></li>
+                    <li class="nav-item mb-2"><a href="#" id="texto" class="nav-link p-0 text-muted">Moda</a></li>
+                    <li class="nav-item mb-2"><a href="#" id="texto" class="nav-link p-0 text-muted">Móveis, Casa e Jardim</a></li>
+                    <li class="nav-item mb-2"><a href="#" id="texto" class="nav-link p-0 text-muted">Tecnologia</a></li>
+                    <li class="nav-item mb-2"><a href="#" id="texto" class="nav-link p-0 text-muted">Roupinhas</a></li>
+                    <li class="nav-item mb-2"><a href="#" id="texto" class="nav-link p-0 text-muted">Equipamentos e Ferramentas</a></li>
+                </ul>
+            </div>
+
+
+        </footer>
+
+
+
+
+    <!-- Seus scripts JavaScript -->
+    
+    
+
+    <!-- Seus scripts adicionais aqui -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+    @await Component.InvokeAsync("NToastNotify")
+
+</body>
+</html>

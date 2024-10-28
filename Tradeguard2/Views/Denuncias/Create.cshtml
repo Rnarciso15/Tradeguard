@@ -1,0 +1,191 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@model Tradeguard2.Models.Denuncias
+@inject ApplicationDbContext ApplicationDbContext
+@{
+    ViewData["Title"] = "Create";
+}
+@section Style {
+
+    <style>
+        .row-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .col-denuncia,
+        .col-anuncio {
+            width: 49%; 
+        }
+
+        #card_container {
+            background-color: white;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 50px;
+            padding-left: 100px;
+            padding-right: 100px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        #Preco {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 0px;
+            margin-left: 5px;
+        }
+
+        #titulo {
+            font-size: 14px;
+            margin-bottom: 10px;
+            margin-left: 5px;
+        }
+
+        #localizacao_hora {
+            font-size: 12px;
+            margin-bottom: 0px;
+            margin-left: 5px;
+        }
+
+        .card-body {
+            text-align: left;
+        }
+
+       
+       
+
+      
+       
+      
+            
+
+       
+
+
+
+
+
+
+    </style>
+}
+
+
+<div class="row-container">
+    <div class="col-md-6 col-denuncia" id="card_container">
+
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="denunciaDropdown"  data-toggle="dropdown" aria-expanded="false">
+                Selecione...
+            </button>
+            <div class="dropdown-menu" aria-labelledby="denunciaDropdown">
+                <a class="dropdown-item"  data-value="default">Selecione...</a>
+                <a class="dropdown-item"  data-value="dadosVendedorErrados">Dados do vendedor errados</a>
+                <a class="dropdown-item"  data-value="problemasArtigoServico">Problemas com o artigo/serviço</a>
+                <a class="dropdown-item"  data-value="fraude">Fraude</a>
+                <a class="dropdown-item" data-value="abusoDiscriminacaoNudez">Abuso, discriminação, nudez</a>
+            </div>
+        </div>
+
+        <div id="submenu" style="display: none;">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="subOptionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Subopções
+                </button>
+                <div class="dropdown-menu" aria-labelledby="subOptionsDropdown" id="subOptions">
+                    <!-- Options will be dynamically populated based on the selected main option -->
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-secondary" onclick="selecionarOpcao('Fechar')">Fechar</button>
+        <button class="btn btn-primary" onclick="selecionarOpcao('Guardar')">Denunciar</button>
+
+   
+
+
+       @*  <form asp-action="Create" class="needs-validation" novalidate>
+            <h1>Reportar anuncio</h1>
+            <div class="form-group">
+                <label asp-for="Tipo" class="control-label">Tipo:</label>
+                <input asp-for="Tipo" class="form-control" required />
+            </div>
+
+            <input asp-for="CC" class="form-control" type="hidden"required />
+            <input asp-for="Id_Anuncio" type="hidden" class="form-control" required />
+            <input asp-for="Data" type="hidden" class="form-control" required />
+              
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+        </form> *@
+    </div>
+
+    <div class="col-md-6 col-anuncio text-center align-items-center" id="card_container">
+        <div class="cardProduto" >
+            @{
+                var AnuncioId = ViewData["idAnuncio"]?.ToString();
+                var AnuncioIdInt = Convert.ToInt32(AnuncioId);
+                var Anuncio = await ApplicationDbContext.Anuncios.FirstOrDefaultAsync(m => m.Id_anuncio == AnuncioIdInt);
+                var profilePictureBytes = Anuncio?.Imagem_destaque;
+                <img class="card-img-top" src=@ImageHelper.GetImageLink(profilePictureBytes, "AnunciosEnviado") style="border-radius:10px;" alt="..." asp-append-version="true" />
+
+
+            }
+                <div class="card-body">
+                <p id="titulo">@Anuncio.Titulo</p>
+                <p id="Preco">@Anuncio.Preco</p>
+                <p id="localizacao_hora">@Anuncio.localizacao</p>
+                </div>      
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-8 offset-md-2">
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var opcaoSelecionada = '';
+
+        function selecionarOpcao(opcao) {
+            opcaoSelecionada = opcao;
+            alert(opcaoSelecionada);
+
+            var subOptions = $('#subOptionsDropdown');
+            var submenu = $('#submenu');
+
+            subOptions.next().empty();
+
+            if (opcaoSelecionada === 'dadosVendedorErrados') {
+                appendSubOption('Contacto errado');
+                appendSubOption('Profissional a apresentar-se como particular');
+            } else if (opcaoSelecionada === 'problemasArtigoServico') {
+                appendSubOption('Artigo ou serviço proibido');
+                appendSubOption('Artigo contrafeito');
+                appendSubOption('Venda ilegal de animais');
+            } else if (opcaoSelecionada === 'fraude') {
+                appendSubOption('Fui vítima de fraude');
+                appendSubOption('Suspeito de fraude');
+            } else if (opcaoSelecionada === 'abusoDiscriminacaoNudez') {
+                appendSubOption('Discurso de ódio');
+                appendSubOption('Discriminação');
+                appendSubOption('Conteúdo sexual');
+            }
+
+            submenu.css('display', opcaoSelecionada !== 'default' ? 'block' : 'none');
+        }
+
+        function appendSubOption(option) {
+            var subOptions = $('#subOptionsDropdown').next();
+            subOptions.append('<a class="dropdown-item" href="#" data-value="' + option + '">' + option + '</a>');
+        }
+    </script>
+}
+

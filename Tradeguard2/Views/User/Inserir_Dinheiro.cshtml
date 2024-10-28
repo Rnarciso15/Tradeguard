@@ -1,0 +1,177 @@
+﻿@model Tradeguard2.Models.PagamentoViewModel
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+@{
+    ViewData["Title"] = "Details User";
+    var mediaQuery = @"
+        @media only screen and  (max-width: 768px) {
+               #div_geral {
+
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100%;
+            
+            border-radius: 10px;
+            flex-direction: column;
+            padding: 40px;
+            margin-top: 20px;
+ background-color: white;
+-webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+        }
+ .Info_Utilizador{ 
+display: flex;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+        }
+        }
+    ";
+}
+
+@section Style {
+    <style>
+        #div_geral {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100%;
+            border-radius: 10px;
+            flex-direction: column;
+            padding: 40px;
+            margin-top: 20px;
+             background-color: white;
+-webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+        }
+        .Info_Utilizador{
+             display: flex;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+        }
+       
+      
+       
+        
+
+        .h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        
+
+        .label {
+            margin-top: 10px;
+            color: #666;
+        }
+
+        .input {
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+
+        .button {
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+       .formulario{
+           display:flex;
+           flex-direction:column;
+       }
+            .button:hover {
+                background-color: #0056b3;
+            }
+             @Html.Raw(mediaQuery)
+    </style>
+}
+
+<div id="div_geral">
+             @{
+            string nome = ""; // Declare variables outside the code block
+            decimal saldo = 0; // Assuming Saldo is of type decimal
+
+            var userlog = await UserManager.GetUserAsync(User);
+    
+            if (userlog != null)
+            {
+                var utilizador = ApplicationDbContext.Users.FirstOrDefault(p => p.Id == userlog.Id);
+                if (utilizador != null)
+                {
+                    nome = utilizador.Nome;
+                    saldo = utilizador.Saldo; // Assign value to saldo
+                }
+            }
+        }
+        <h1 class="h1">Adicionar Saldo</h1>
+        <div class="Info_Utilizador">
+        <label class="label"for="user-name">Nome: @nome</label>
+        <label class="label" for="user-balance">Saldo: @saldo €</label>
+       
+    </div>
+        <form class="formulario" asp-action="adicionar_Saldo" asp-controller="User">
+       <label class="label" for="N_Cartao">Número do Cartão:</label>
+<input class="input" type="text" id="N_Cartao" name="N_Cartao" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" oninput="formatarCartao(this)">
+
+<label class="label" for="expiry">Validade:</label>
+<input class="input" type="text" id="expiry" name="validade" placeholder="MM/AA" maxlength="5" oninput="formatarValidade(this)">
+
+
+<label class="label" for="cvv">CVV:</label>
+<input class="input" type="text" id="cvv" name="CVV" placeholder="XXX" maxlength="3">
+
+<label class="label" for="name">Nome no Cartão:</label>
+<input class="input" type="text" id="name" name="Nome">
+
+<label class="label" for="Quantia">Quantia:</label>
+<input class="input" type="number" id="Quantia" name="Quantia">
+
+
+            <button class="button"type="submit">Pagar</button>
+        </form>
+    
+</div>
+
+@section Scripts {<script>
+function formatarValidade(input) {
+    // Remove todos os caracteres que não são números do valor atual
+    var valor = input.value.replace(/\D/g, '');
+
+    // Adiciona uma barra após os primeiros dois caracteres (mês) se o comprimento for maior que 2
+    if (valor.length > 2) {
+        valor = valor.substr(0, 2) + '/' + valor.substr(2);
+    }
+
+    // Define o valor formatado no campo de entrada
+    input.value = valor;
+}
+</script>
+    <script>
+function formatarCartao(input) {
+    // Remove todos os espaços em branco do valor atual
+    var valor = input.value.replace(/\s/g, '');
+
+    // Adiciona um espaço a cada quatro caracteres, exceto no final
+    var novoValor = '';
+    for (var i = 0; i < valor.length; i++) {
+        if (i > 0 && i % 4 === 0) {
+            novoValor += ' ';
+        }
+        novoValor += valor[i];
+    }
+
+    // Define o valor formatado no campo de entrada
+    input.value = novoValor;
+}
+</script>
+}

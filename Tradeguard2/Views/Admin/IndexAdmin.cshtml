@@ -1,0 +1,518 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@model IEnumerable<Tradeguard2.Models.Anuncios>
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+@{
+    ViewData["Title"] = "Home Page";
+    
+    var mediaQuery = @"
+          @media only screen and (max-width: 960px) {
+              .cardInfo {
+                flex-basis: calc(50% - 20px); /* 2 cards por linha */
+            }
+          }
+
+        @media only screen and (max-width: 768px) {
+               .cardInfo {
+                flex-basis: calc(100% - 20px); /* 1 card por linha */
+            }
+
+  .infobasic {
+           display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    flex-direction: column;
+        }
+
+ #pieChart, #denunciasPorCategoriaChart{
+          display: block;
+    box-sizing: border-box;
+    height: 200px;
+    width: 324px;
+      }
+
+    .PizzaCARD {
+    height:400px;
+      }
+                  }
+
+         @media only screen and (max-width: 1300px)  {
+             .cardInfo {
+                 flex-basis: calc(50% - 20px);
+            }
+            .PizzaCARD {
+                height:700px;
+                  }
+
+        }
+ 
+
+    ";
+}
+
+@section Style {
+  <style>
+      .Graficos{
+              display: flex;
+    flex-direction: row;
+    gap: 15px;
+    width: 100%;
+      }
+     .DadosInfo{
+         
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+     }
+      .PizzaCARD {
+          background-color: white;
+    transition: transform 0.2s;
+    box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+    -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+    -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    width: 50%;
+    height:600px;
+    height: 800px;
+      }
+        .highlight {
+                 font-size: 1.5em;
+                color: #000000;
+                font-weight: bold;
+                margin-bottom:0;
+   
+        }
+       .cardInfo h4{
+            margin-bottom:0;
+        }
+      .Tabela_Vendas{
+      
+    background-color: white;
+    transition: transform 0.2s;
+    box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+  -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+    -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+      }
+       .cardInfo {
+            background-color: white;
+            transition: transform 0.2s;
+            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+           -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            flex-basis: calc(25% - 20px); /* 4 cards por linha por padrão */
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .infobasic {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+         
+        .ImgIcons {
+            width: 70px;
+            height: auto;
+        }
+
+           @Html.Raw(mediaQuery)
+    </style> 
+    }
+     
+@{
+   var userlog = await UserManager.GetUserAsync(User);
+if (userlog != null)
+{
+    var users = await ApplicationDbContext.Users.Where(p => p.Id != userlog.Id).ToListAsync();
+}
+var TotalUtilizadores = await ApplicationDbContext.Users.CountAsync() - 1;
+var vendasConcluidas = await ApplicationDbContext.PropostasDeCompra.Where(p => p.Venda_Concluida).CountAsync();
+var AnunciosPublicados = await ApplicationDbContext.Anuncios.Where(p=>!p.Venda_Concluida).CountAsync();
+var propostasConcluidas = await ApplicationDbContext.PropostasDeCompra.Where(p => p.Venda_Concluida).ToListAsync();
+decimal totalDinheiro = propostasConcluidas.Sum(p => decimal.Parse(p.Preco_proposta));
+var propostas = await ApplicationDbContext.PropostasDeCompra.Where(p => p.Proposta_Aceite).ToListAsync();
+
+var vendasPorCategoria = await ApplicationDbContext.PropostasDeCompra
+    .Where(p => p.Venda_Concluida)
+    .Join( ApplicationDbContext.Anuncios,
+        proposta => proposta.Id_Anuncio,
+        anuncio => anuncio.Id_anuncio,
+        (proposta, anuncio) => new { Proposta = proposta, Anuncio = anuncio })
+    .GroupBy(pair => pair.Anuncio.Categoria)
+    .Select(g => new { Categoria = g.Key, TotalVendas = g.Count() })
+    .ToListAsync();
+
+var denunciasPorCategoria = await ApplicationDbContext.Denuncias
+    .Join( ApplicationDbContext.Anuncios,
+        denuncia => denuncia.Id_Anuncio,
+        anuncio => anuncio.Id_anuncio,
+        (denuncia, anuncio) => new { Denuncia = denuncia, Anuncio = anuncio })
+    .GroupBy(pair => pair.Anuncio.Categoria)
+    .Select(g => new { Categoria = g.Key, TotalDenuncias = g.Count() })
+    .ToListAsync();
+
+
+    var labels = vendasPorCategoria.Select(item => item.Categoria).ToArray();
+    var data = vendasPorCategoria.Select(item => item.TotalVendas).ToArray();
+
+     var denunciasLabels = denunciasPorCategoria.Select(item => item.Categoria).ToArray();
+        var denunciasData = denunciasPorCategoria.Select(item => item.TotalDenuncias).ToArray();
+
+}
+<div class="">
+
+<div class="infobasic">
+
+    <div class="cardInfo">
+        <img src="~/Imagens/AdminDashboard/teamwork.png" class="ImgIcons">
+      <div class="DadosInfo">
+           <h4>Total de Utilizadores</h4>
+        <p class="highlight">@TotalUtilizadores</p>
+       </div>
+      
+    </div>
+    
+    <div class="cardInfo">
+        <img src="~/Imagens/AdminDashboard/ads.png" class="ImgIcons">
+       <div class="DadosInfo">
+            <h4>Anúncios publicados</h4>     
+        <p class="highlight">@AnunciosPublicados</p>
+       </div>
+       
+    </div>
+       
+    <div class="cardInfo">
+        <img src="~/Imagens/AdminDashboard/buy.png" class="ImgIcons">
+      
+       <div class="DadosInfo">          
+             <h4>Vendas Concluídas</h4>
+            <p class="highlight">@vendasConcluidas</p>
+       </div>
+      
+    </div>
+
+    <div class="cardInfo">
+        <img src="~/Imagens/AdminDashboard/money.png" class="ImgIcons">
+         <div class="DadosInfo">          
+         <h4>Dinheiro vendas concluídas</h4>
+        <p class="highlight">@totalDinheiro €</p>
+       </div>
+     
+    </div>
+
+</div>
+ 
+  <div class="Tabela_Vendas">
+   
+       <div style="display: flex;flex-direction: row;gap: 10px;">
+    <select id="estado_proposta" class="form-select" onchange="getPropostasByEstado()">
+        <option value="Todos">Todos</option>
+        <option value="Concluídas">Concluídas</option>
+        <option value="Validadas">Validadas</option>
+        <option value="Por Validar">Por Validar</option>
+        <option value="Dinheiro Pendente">Dinheiro Pendente</option>
+    </select>
+
+
+         
+      <input type="text" id="search_input" class="form-control" placeholder="Pesquisar ID do Anúncio ou ID da proposta" onkeyup="getPropostasByInput()">
+
+
+    </div>
+    
+ 
+
+    <table id="tabela-propostas" class="table">
+        <thead>
+            <tr>
+                <th>ID da proposta</th>
+                <th>ID do Anúncio</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+         
+            @if (!propostas.Any())
+            {
+                <tr>
+                    <td colspan="3" class="text-center">Não há propostas de anúncios disponíveis.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var proposta in propostas)
+                {
+                    <tr>
+                        <td>@proposta.Id_Proposta</td>
+                        <td>@proposta.Id_Anuncio</td>
+                        <td>
+                            @if (proposta.Venda_Concluida)
+                            {
+                                <span class="badge bg-success">Concluída</span>
+                            }
+                            else if (proposta.Venda_Validada)
+                            {
+                                <span class="badge bg-primary">Validada</span>
+                            }
+                            else if (proposta.Produto_recebido)
+                            {
+                                <span class="badge bg-warning text-dark">Por Validar</span>
+                            }
+                            else if (proposta.Proposta_Aceite)
+                            {
+                                <span class="badge bg-secondary">Dinheiro Pendente</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+             <div id="loading" class="loader">
+        <div class="loader--dot"></div>
+        <div class="loader--dot"></div>
+        <div class="loader--dot"></div>
+        <div class="loader--dot"></div>
+        <div class="loader--dot"></div>
+        <div class="loader--dot"></div>
+        <div class="loader--text">Carregando dados...</div>
+    </div>
+
+    <!-- Seus scripts JavaScript -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+ 
+
+              
+
+             
+        </tbody>
+    </table>
+</div>
+
+<div class="Graficos">
+    <div class="PizzaCARD" >
+         <h3>Vendas por Categoria</h3>
+    @if (labels.Any() && data.Any()  )
+    {
+        <canvas id="pieChart"></canvas>
+         
+    }
+    else
+    {
+        <p>Não há dados disponíveis para exibir o gráfico.</p>
+    }
+    </div>
+    <div class="PizzaCARD" >
+         <h3>Denúncias por Categoria</h3>
+    @if (denunciasLabels.Any() && denunciasData.Any()  )
+    {
+        <canvas id="denunciasPorCategoriaChart"></canvas>
+       
+    }
+    else
+    {
+        <p>Não há dados disponíveis para exibir o gráfico.</p>
+    }
+    </div>
+</div>
+
+ 
+
+
+</div>
+
+
+@section Scripts {
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var ctx = document.getElementById('pieChart').getContext('2d');
+        var pieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: @Html.Raw(Json.Serialize(labels)),
+                datasets: [{
+                    label: 'Vendas por Categoria',
+                    data: @Html.Raw(Json.Serialize(data)),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 159, 64, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false 
+            }
+        });
+    </script>
+      <script>
+        var ctxDenuncias = document.getElementById('denunciasPorCategoriaChart').getContext('2d');
+        var denunciasPorCategoriaChart = new Chart(ctxDenuncias, {
+            type: 'pie',
+            data: {
+                labels: @Html.Raw(Json.Serialize(denunciasLabels)),
+                datasets: [{
+                    label: 'Denúncias por Categoria',
+                    data: @Html.Raw(Json.Serialize(denunciasData)),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 159, 64, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+       <script>
+        // Função para mostrar o loading
+        function showLoading() {
+            $('#loading').show();
+        }
+
+        // Função para ocultar o loading
+        function hideLoading() {
+            $('#loading').hide();
+        }
+
+        // Mostrar o loading ao iniciar o carregamento da página
+        $(document).ready(function () {
+            showLoading();
+        });
+
+        // Ocultar o loading quando todos os recursos da página foram carregados
+        $(window).on('load', function () {
+            hideLoading();
+        });
+    </script>
+   <script>
+    function getPropostasByEstado() {
+        var estado = document.getElementById("estado_proposta").value;
+        $.ajax({
+            url: '/Admin/GetPropostasByEstado',
+            type: 'GET',
+            dataType: 'json',
+            data: { estado: estado },
+    success: function (data) {
+    
+        $('#tabela-propostas tbody').empty();
+
+        $.each(data, function (index, proposta) {
+            var status;
+            if (proposta.venda_Concluida) {
+                status = '<span class="badge bg-success">Concluída</span>';
+            } else if (proposta.venda_Validada) {
+                status = '<span class="badge bg-primary">Validada</span>';
+            } else if (proposta.produto_recebido) {
+                status = '<span class="badge bg-warning text-dark">Por Validar</span>';
+            } else if (proposta.proposta_Aceite) {
+                status = '<span class="badge bg-secondary">Dinheiro Pendente</span>';
+            }
+
+            $('#tabela-propostas tbody').append(
+                '<tr>' +
+                '<td>' + proposta.id_Proposta + '</td>' +
+                '<td>' + proposta.id_Anuncio + '</td>' +
+                '<td>' + status + '</td>' +
+                '</tr>'
+            );
+        });
+    
+},
+
+
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+</script>
+<script>
+    function getPropostasByInput() {
+        var searchTerm = document.getElementById("search_input").value;
+        var estado = document.getElementById("estado_proposta").value;
+        $.ajax({
+            url: '/Admin/GetPropostasByInput',
+            type: 'GET',
+            dataType: 'json',
+            data: { searchTerm: searchTerm , estado: estado },
+            success: function (data) {
+                $('#tabela-propostas tbody').empty();
+             $.each(data, function (index, proposta) {
+            var status;
+            if (proposta.venda_Concluida) {
+                status = '<span class="badge bg-success">Concluída</span>';
+            } else if (proposta.venda_Validada) {
+                status = '<span class="badge bg-primary">Validada</span>';
+            } else if (proposta.produto_recebido) {
+                status = '<span class="badge bg-warning text-dark">Por Validar</span>';
+            } else if (proposta.proposta_Aceite) {
+                status = '<span class="badge bg-secondary">Dinheiro Pendente</span>';
+            }
+
+            $('#tabela-propostas tbody').append(
+                '<tr>' +
+                '<td>' + proposta.id_Proposta + '</td>' +
+                '<td>' + proposta.id_Anuncio + '</td>' +
+                '<td>' + status + '</td>' +
+                '</tr>'
+            );
+        });
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+</script>
+
+
+ 
+
+}
+

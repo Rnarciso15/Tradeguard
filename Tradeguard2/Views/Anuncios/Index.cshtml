@@ -1,0 +1,1195 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Tradeguard2.Data
+@using Tradeguard2.Helpers
+@using Tradeguard2.Helpers
+@model IEnumerable<Tradeguard2.Models.Anuncios>
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext ApplicationDbContext
+@{
+    ViewData["Title"] = "Index";
+    int i = 1;
+}
+
+@{
+    var mediaQuery = @"
+        @media only screen and (min-width: 601px) and (max-width: 960px) {
+            .imagens > a {
+                flex: 0 0 calc(33.33% - 10px);
+            }
+
+            .cardProduto {
+                flex-direction: column;
+            }
+
+            .imgProduto {
+                max-width: 100%;
+                border-radius: 10px 10px 0 0;
+            }
+        }
+    ";
+      var mediaQuery1 = @"
+        @media only screen and (max-width: 600px) {
+            .imagens > a {
+                flex: 0 0 calc(33.33% - 10px);
+            }
+
+            .cardProduto {
+                flex-direction: column;
+            }
+
+            .imgProduto {
+                max-width: 100%;
+                border-radius: 10px 10px 0 0;
+            }
+
+            .filtros {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .filtros input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .categorias,
+            .Sub-categorias {
+                text-align: center;
+            }
+
+            .categorias img,
+            .Sub-categorias img {
+                width: 70px; /* Ajuste conforme necessário */
+            }
+
+  .filtros_selecionados {
+                justify-content: center; /* Centraliza o conteúdo */
+                text-align: center; /* Centraliza o texto */
+            }
+
+            .subcategoria-selecionada,
+            .categoria-selecionada {
+                display: flex;
+                align-items: center;
+                justify-content: center; /* Centraliza o botão de cancelar */
+                text-align: center; /* Centraliza o texto */
+            margin-left:0px;
+            }
+
+        
+        }
+    ";
+}
+
+@section Style {
+    <style>
+        
+        .button-container {
+            display: flex;
+            gap: 10px; /* Adjust the gap as needed */
+        }
+                        .imagens > a {
+                            flex: 0 0 calc(15% - 10px);
+                            margin: 5px;
+                        }
+
+
+                        .imagem-categoria {
+                            transition: transform 0.2s;
+                        }
+
+                            .imagem-categoria:hover {
+                                transform: translateY(-10px);
+                                cursor: pointer;
+                            }
+
+                        .Sub-categorias a {
+                            background-color: transparent;
+                            text-decoration: none;
+                            color: black;
+                        }
+
+                        .categorias a {
+                            background-color: transparent;
+                            text-decoration: none;
+                            color: black;
+                        }
+
+                        .separador {
+                            border-top: 1px solid #112647;
+                            margin-top: 20px;
+                            margin-bottom: 60px;
+                        }
+
+                        .filtros {
+                            display: flex;
+                            align-items: center;
+                            margin: 10px;
+                            margin-top: 60px;
+                        }
+
+                            .filtros button, .filtros input, .filtros .dropdown {
+                                margin-right: 10px;
+                            }
+
+                        .cardProduto {
+                            display: flex;
+                            border: 1px solid #e0e0e0;
+                            border-radius: 10px;
+                            margin-top: 20px;
+                            margin-bottom: 20px;
+                            overflow: hidden;
+                            width: 100%;
+                        }
+
+                        .imgProduto {
+                            flex: 1;
+                            max-width: 300px;
+                            border-radius: 10px 0 0 10px;
+                        }
+
+                            .imgProduto img {
+                                width: 100%;
+                                height: auto;
+                                    max-height: 250px;
+                            }
+
+                        .card-info {
+                            flex: 2;
+                            padding: 20px;
+                        }
+
+                        #titulo {
+                            font-size: 24px;
+                            font-weight: bold;
+                        }
+
+                        #Preco {
+                            font-size: 15px;
+                            font-weight: bold;
+                            margin-bottom: 0px;
+                        }
+
+                        #localizacao_hora {
+                            font-size: 14px;
+                            color: #555;
+                            margin-top: 10px;
+                        }
+
+                        #mostrarSubcategorias {
+                            color: white;
+                            background-color: #112647;
+                            border-color: white;
+                            border-radius: 10px;
+                            border-width: 2px;
+                            border-style: solid;
+                        }
+
+                            #mostrarSubcategorias:hover {
+                                color: #112647;
+                                background-color: white;
+                                border-color: #112647;
+                                border-radius: 10px;
+                                border-width: 2px;
+                                border-style: solid;
+                            }
+
+                        #mostrarCategorias {
+                            color: white;
+                            background-color: #112647;
+                            border-color: white;
+                            border-radius: 10px;
+                            border-width: 2px;
+                            border-style: solid;
+                        }
+
+                            #mostrarCategorias:hover {
+                                color: #112647;
+                                background-color: white;
+                                border-color: #112647;
+                                border-radius: 10px;
+                                border-width: 2px;
+                                border-style: solid;
+                            }
+
+                        #botao_anunciar {
+                            color: white;
+                            background-color: #112647;
+                            border-color: white;
+                            border-radius: 10px;
+                            border-width: 2px;
+                            border-style: solid;
+                            text-decoration: none;
+                            padding: 10px;
+                        }
+
+                            #botao_anunciar:hover {
+                                color: #112647;
+                                background-color: white;
+                                border-color: #112647;
+                                border-radius: 10px;
+                                border-width: 2px;
+                                border-style: solid;
+                                text-decoration: none;
+                                padding: 10px;
+                            }
+
+                        .cardProduto {
+                            background-color: white;
+                            transition: transform 0.2s;
+                            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                           -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+                            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                            border-radius: 10px;
+                            padding: 15px;
+                            margin-top: 10px;
+                            margin-bottom: 10px;
+                        }
+
+                            .cardProduto:hover {
+                                transform: translateX(-10px);
+                                cursor: pointer;
+                            }
+
+                        .card-img-top {
+                            border-radius: 10px;
+                        }
+
+                        #button_drop {
+                            color: #112647;
+                            background-color: white;
+                            border-color: #112647;
+                            border-radius: 10px;
+                            border-width: 2px;
+                            border-style: solid;
+                        }
+
+                        .Sub-categorias {
+                            background-color: white;
+                            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                          -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+                            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                            border-radius: 10px;
+                            padding: 20px;
+                            margin-top: 20px;
+                            margin-bottom: 20px;
+                        }
+
+                        .categorias {
+                            background-color: white;
+                            box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                     -webkit-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.15);
+                            -moz-box-shadow: 0px 0px 15px 7px rgba(0,0,0,0.4);
+                            border-radius: 10px;
+                            padding: 20px;
+                            margin-top: 20px;
+                            margin-bottom: 20px;
+                        }
+
+                        .imagens {
+                            display: flex;
+                            flex-wrap: wrap;
+                            justify-content: space-between;
+                            margin: 20px;
+                        }
+
+                        .filtros_selecionados {
+                            display: flex;
+                            align-items: center;
+                            margin: 10px;
+                            margin-top: 60px;
+                        }
+
+                        .subcategoria-selecionada {
+                            color: #112647;
+                            background-color: white;
+                            border-color: #112647;
+                            border-radius: 10px;
+                            border-width: 2px;
+                            border-style: solid;
+                            padding: 10px;
+                            margin-left: 10px;
+                        }
+
+                        .categoria-selecionada {
+                            color: #112647;
+                            background-color: white;
+                            border-color: #112647;
+                            border-radius: 10px;
+                            border-width: 2px;
+                            border-style: solid;
+                            padding: 10px;
+                        }
+
+  @Html.Raw(mediaQuery)    
+  @Html.Raw(mediaQuery1)
+  </style>
+ 
+}
+
+
+<div >
+
+    <div class="filtros_selecionados">
+
+
+        <div class="categoria-selecionada" style="display: none;">
+            <input type="hidden" id="categoria-input" >
+            <span id="categoria-texto"></span>
+            <button id="removerCategoria" style=" margin-left:10px;border-radius: 10px; border-style: solid;" class="btn_remover">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" style="color:#112647;margin:2px;" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                </svg>
+            </button>
+        </div>
+        <div class="subcategoria-selecionada" style="display: none;">
+            <input type="hidden" id="subcategoria-input" >
+            <span id="subcategoria-texto"></span>
+            <button id="removerSubcategoria" style="margin-left: 10px; border-radius: 10px; border-style: solid;" class="btn_remover">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" style="color: #112647; margin: 2px;" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                </svg>
+            </button>
+        </div>
+
+    </div>
+    <div class="filtros">
+
+        <button id="mostrarCategorias" type="button" class="btn btn-primary">Categorias</button>
+        <button id="mostrarSubcategorias" type="button" class="btn btn-primary">Sub-categorias</button>
+        <input class="form-control me-2" onchange="getUsers()"id="DE"type="number" placeholder="De" min="0">
+        <input class="form-control me-2" onchange="getUsers()"id="PARA"type="number" placeholder="Para" min="0">
+       
+    </div>
+
+
+    <div class="separador"></div>
+
+    <div class="Sub-categorias" style="display: none;">
+        <div style="text-align:center;">
+            <h1>Sub-categorias</h1>
+            <div class="carros" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/carros_motas_barcos/car.png" style="width: 100px;" alt="Carro">
+                        <p>Carros</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/carros_motas_barcos/motorbike.png" style="width: 100px;" alt="Carro">
+                        <p>Motas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/carros_motas_barcos/truck.png" style="width: 100px;" alt="Carro">
+                        <p>Camiões</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/carros_motas_barcos/camper.png" style="width: 100px;" alt="Carro">
+                        <p>Autocaravanas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/carros_motas_barcos/speed-boat.png" style="width: 100px;" alt="Carro">
+                        <p>Barcos</p>
+                    </a>
+                </div>
+            </div>
+            <div class="imoveis" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/Imoveis/apartment.png" style="width: 100px;" alt="imoveis">
+                        <p>Apartamentos</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias//Imoveis/bed.png" style="width: 100px;" alt="imoveis">
+                        <p>Quartos</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/Imoveis/garage.png" style="width: 100px;" alt="imoveis">
+                        <p>Garagens</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/Imoveis/house.png" style="width: 100px;" alt="imoveis">
+                        <p>Casas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/Imoveis/Land1.png" style="width: 100px;" alt="imoveis">
+                        <p>Terrenos</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/Imoveis/store.png" style="width: 100px;" alt="imoveis">
+                        <p>Lojas</p>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="Bebe_Crianca" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/bebe_crianca/baby-outfit.png" style="width: 100px;" alt="Bebe_Crianca">
+                        <p>Roupinhas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/bebe_crianca/baby-shoes.png" style="width: 100px;" alt="Bebe_Crianca">
+                        <p>Calçado</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/bebe_crianca/baby-walker.png" style="width: 100px;" alt="Bebe_Crianca">
+                        <p>Passeio</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/bebe_crianca/baby.png" style="width: 100px;" alt="Bebe_Crianca">
+                        <p>Relaxar e Dormir</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/bebe_crianca/cutlery.png" style="width: 100px;" alt="Bebe_Crianca">
+                        <p>Refeição</p>
+                    </a>
+                </div>
+            </div>
+            <div class="lazer" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/lazer/amphora.png" style="width: 100px;" alt="lazer">
+                        <p>Colecções - Antiguidades</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/lazer/apple.png" style="width: 100px;" alt="lazer">
+                        <p>Livros - Revistas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/lazer/board-games.png" style="width: 100px;" alt="lazer">
+                        <p>Brinquedos - Jogos</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/lazer/dvd.png" style="width: 100px;" alt="lazer">
+                        <p>DVD - Filmes</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/lazer/violin.png" style="width: 100px;" alt="lazer">
+                        <p>Instrumentos Musicais</p>
+                    </a>
+                </div>
+            </div>
+             <div class="Telemoveis_Tablets" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/telemoveis_tablets/smartphone.png" style="width: 100px;" alt="Telemoveis_Tablets">
+                        <p>Telemóveis</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/telemoveis_tablets/phone-case.png" style="width: 100px;" alt="Telemoveis_Tablets">
+                        <p>Acessórios</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/telemoveis_tablets/tablet.png" style="width: 100px;" alt="Telemoveis_Tablets">
+                        <p>Tablets</p>
+                    </a>
+                    
+                </div>
+            </div>
+             <div class="Agricultura" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/agricultura/flax-seed.png" style="width: 100px;" alt="Agricultura">
+                        <p>Sementes,Árvores e Produtos Agricolas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/agricultura/gardening.png" style="width: 100px;" alt="Agricultura">
+                        <p>Alfaias Agricolas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/agricultura/tractor.png" style="width: 100px;" alt="Agricultura">
+                        <p>Tratores</p>
+                    </a>
+                    
+                </div>
+            </div>
+                <div class="Animais" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/animais/adoption.png" style="width: 100px;" alt="Animais">
+                        <p>Animais Para Adoção</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/animais/cow.png" style="width: 100px;" alt="Animais">
+                        <p>Animais de Quinta</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/animais/dog-collar.png" style="width: 100px;" alt="Animais">
+                        <p>Acessórios</p>
+                    </a>
+                    
+                </div>
+            </div>
+              <div class="Desporto" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/bike.png" style="width: 100px;" alt="Desporto">
+                        <p>Bicicletas</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/billiard.png" style="width: 100px;" alt="Desporto">
+                        <p>Bilhar</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/walking.png" style="width: 100px;" alt="Desporto">
+                        <p>Caminhada,Corrida e Atletismo</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/camping-tent.png" style="width: 100px;" alt="Desporto">
+                        <p>Campismo</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/martial-arts.png" style="width: 100px;" alt="Desporto">
+                        <p>Desportos de Combate</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/goal.png" style="width: 100px;" alt="Desporto">
+                        <p>Futsal e Futebol</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/golf.png" style="width: 100px;" alt="Desporto">
+                        <p>Golf</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/dumbbell.png" style="width: 100px;" alt="Desporto">
+                        <p>Musculação e Fitness</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/desporto/surfboard.png" style="width: 100px;" alt="Desporto">
+                        <p>Surf e Bodyboard</p>
+                    </a>
+                </div>
+            </div>
+              <div class="Moda" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moda/sport-shoes.png" style="width: 100px;" alt="Moda">
+                        <p>Calçado</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moda/wristwatch.png" style="width: 100px;" alt="Moda">
+                        <p>Jóias, Relógios e Bijuteria</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moda/shopping-bag.png" style="width: 100px;" alt="Moda">
+                        <p>Malas e Acessórios</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moda/sewing-machine.png" style="width: 100px;" alt="Moda">
+                        <p>Retrosaria</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moda/hanger.png" style="width: 100px;" alt="Moda">
+                        <p>Roupa</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moda/suncream.png" style="width: 100px;" alt="Moda">
+                        <p>Saúde - Beleza</p>
+                    </a>
+                    
+                </div>
+            </div>
+             <div class="Moveis_Casa_Jardim" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moveis_casa_jardim/laundry.png" style="width: 100px;" alt="Moveis_Casa_Jardim">
+                        <p>Electrodomésticos</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moveis_casa_jardim/watering-plants.png" style="width: 100px;" alt="Moveis_Casa_Jardim">
+                        <p>Jardim e Bricolage</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moveis_casa_jardim/armchair.png" style="width: 100px;" alt="Moveis_Casa_Jardim">
+                        <p>Móveis</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/moveis_casa_jardim/flower.png" style="width: 100px;" alt="Moveis_Casa_Jardim">
+                        <p>Utilidades e Decoração</p>
+                    </a>                 
+                    
+                </div>
+            </div>
+                  <div class="Tecnologia" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/tecnologia/computer.png" style="width: 100px;" alt="Tecnologia">
+                        <p>Computadores - Informática</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/tecnologia/plug.png" style="width: 100px;" alt="Tecnologia">
+                        <p>Electrónica</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/tecnologia/tv-speaker.png" style="width: 100px;" alt="Tecnologia">
+                        <p>TV, Som e Fotografia</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/tecnologia/video-console.png" style="width: 100px;" alt="Tecnologia">
+                        <p>Videojogos - Consolas</p>
+                    </a>                 
+                    
+                </div>
+            </div>
+                       <div class="Equipamentos_Ferramentas" style="display:none;">
+                <div class="imagens">
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/equiamentos_ferramentas/cooking-equipment.png" style="width: 100px;" alt="Equipamentos_Ferramentas">
+                        <p>Equipamento de Hotelaria e Restauração</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/equiamentos_ferramentas/wip.png" style="width: 100px;" alt="Equipamentos_Ferramentas">
+                        <p>Equipamento e Materiais de Construção Civil</p>
+                    </a>
+                    <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/equiamentos_ferramentas/lathe-machine.png" style="width: 100px;" alt="Equipamentos_Ferramentas">
+                        <p>Equipamento Industrial</p>
+                    </a>
+                     <a>
+                        <img class="imagem-categoria" src="~/Imagens/icons/Sub_categorias/equiamentos_ferramentas/cash-register.png" style="width: 100px;" alt="Equipamentos_Ferramentas">
+                        <p>Equipamento para Lojas e Comércio</p>
+                    </a>                 
+                    
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    <div class="categorias" style="display: none;">
+        <div style="text-align:center;">
+            <h1>Categorias</h1>
+            <div class="imagens">
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/car.png" style="width: 100px;" alt="Carros, motos e barcos">
+                    <p>Carros, motos e barcos</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/new-house.png" style="width: 100px;" alt="Imóveis">
+                    <p>Imóveis</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/toys.png" style="width: 100px;" alt="Bebé e Criança">
+                    <p>Bebé e Criança</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/paddle.png" style="width: 100px;" alt="Lazer">
+                    <p>Lazer</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/smartphone.png" style="width: 100px;" alt="Telemóveis e Tablets">
+                    <p>Telemóveis e Tablets</p>
+                </a>
+
+
+
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/tractor.png" style="width: 100px;" alt="Agricultura">
+                    <p>Agricultura</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/pet.png" style="width: 100px;" alt="Animais">
+                    <p>Animais</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/sports.png" style="width: 100px;" alt="Desporto">
+                    <p>Desporto</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/wardrobe.png" style="width: 100px;" alt="Moda">
+                    <p>Moda</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/armchair.png" style="width: 100px;" alt="Móveis, Casa e Jardim">
+                    <p>Móveis, Casa e Jardim</p>
+                </a>
+
+
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/computer.png" style="width: 100px;" alt="Tecnologia">
+                    <p>Tecnologia</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/wrench.png" style="width: 100px;" alt="Equipamentos e Ferramentas">
+                    <p>Equipamentos e Ferramentas</p>
+                </a>
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/menu.png" style="width: 100px;" alt="Outras Vendas">
+                    <p>Outras Vendas</p>
+                </a>
+
+                <a>
+                    <img class="imagem-categoria" src="~/Imagens/icons/categorias/package.png" style="width: 100px;" alt="Todas as Vendas">
+                    <p>Todas as Vendas</p>
+                </a>
+
+               
+
+
+            </div>
+        </div>
+    </div>
+
+    <div id="lista_card">
+
+         @foreach (var item in Model)
+    {
+        
+         var user = await UserManager.GetUserAsync(User);
+    var UserAnunciosFavoritos = new List<Favoritos>();  // Inicialize a lista vazia
+
+    if (user != null)
+    {
+        // Se o usuário não for nulo, obtenha os Favoritos
+        UserAnunciosFavoritos = await ApplicationDbContext.Favoritos
+            .Where(m => m.Id_Anuncio == item.Id_anuncio && m.CC == user.CC)
+            .ToListAsync();
+    }
+           
+        <div class="cardProduto">
+            <div class="imgProduto">
+                <img class="card-img-top" src="@ImageHelper.GetImageLink(@item.Imagem_destaque, "AnunciosEnviado")" alt="Imagem do Produto" asp-append-version="true" />
+            </div>
+            <div class="card-info">
+                <p id="titulo">@Html.DisplayFor(modelItem => item.Titulo)</p>
+                <p id="Preco">@Html.DisplayFor(modelItem => item.Preco)€</p>
+                <p id="localizacao_hora">@Html.DisplayFor(modelItem => item.localizacao)</p>
+                <div class="button-container">
+                    <a asp-action="Details" asp-controller="Anuncios" asp-route-id="@item.Id_anuncio" id="botao_anunciar">Ver Anúncio</a>
+                  
+                    <form asp-action="Create" asp-controller="Favoritos"> 
+                        <input type="hidden" name="Id_Anuncio" value="@item.Id_anuncio">
+                        <button type="submit" id="botao_anunciar">
+                        @if (user == null || UserAnunciosFavoritos.Count == 0)
+                        {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.920 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                            </svg>
+                        }
+                        else
+                        {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314" />
+                            </svg>
+                        }
+                          
+
+                      
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+       
+      
+
+    }
+
+    </div>
+   
+   
+
+
+
+
+
+
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+    var i = 0;
+    var selecionada = "";
+
+    document.getElementById("mostrarCategorias").addEventListener("click", function () {
+        var categoriasDiv = document.querySelector(".categorias");
+        var subcategoriasDiv = document.querySelector(".Sub-categorias");
+
+        if (categoriasDiv.style.display === "none") {
+            categoriasDiv.style.display = "block";
+            subcategoriasDiv.style.display = "none";
+        } else {
+            categoriasDiv.style.display = "none";
+        }
+    });
+
+    document.getElementById("mostrarSubcategorias").addEventListener("click", function () {
+        var subcategoriasDiv = document.querySelector(".Sub-categorias");
+        var subcategoriasCarros = document.querySelector(".carros");
+        var subcategoriasImoveis = document.querySelector(".imoveis");
+        var subcategoriasbebe = document.querySelector(".Bebe_Crianca");
+        var subcategoriaslazer = document.querySelector(".lazer");
+         var subcategoriasTelemoveis_Tablets = document.querySelector(".Telemoveis_Tablets");
+          var subcategoriasAgricultura = document.querySelector(".Agricultura");
+            var subcategoriasAnimais = document.querySelector(".Animais");
+             var subcategoriasDesporto = document.querySelector(".Desporto");
+             var subcategoriasModa = document.querySelector(".Moda");
+              var subcategoriasMoveis_Casa_Jardim = document.querySelector(".Moveis_Casa_Jardim");
+              var subcategoriasTecnologia = document.querySelector(".Tecnologia");
+               var subcategoriasEquipamentos_Ferramentas = document.querySelector(".Equipamentos_Ferramentas");
+
+
+             
+        if (subcategoriasDiv.style.display === "none" && i == 1) {
+            subcategoriasDiv.style.display = "block";
+
+            if (selecionada === "Carros, motos e barcos") {
+                subcategoriasCarros.style.display = "block";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";
+                subcategoriaslazer.style.display = "none";    
+                subcategoriasTelemoveis_Tablets.style.display = "none";       
+                subcategoriasAgricultura.style.display = "none";        
+                subcategoriasAnimais.style.display = "none";       
+                subcategoriasDesporto.style.display = "none";            
+                subcategoriasModa.style.display = "none";
+                subcategoriasMoveis_Casa_Jardim.style.display = "none"; 
+                subcategoriasTecnologia.style.display = "none"; 
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                                  
+             
+            } else if (selecionada === "Imóveis") {
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "block";
+                subcategoriasbebe.style.display = "none";
+                subcategoriaslazer.style.display = "none";    
+                subcategoriasTelemoveis_Tablets.style.display = "none";       
+                subcategoriasAgricultura.style.display = "none";        
+                subcategoriasAnimais.style.display = "none";       
+                subcategoriasDesporto.style.display = "none";             
+                subcategoriasModa.style.display = "none"; 
+                subcategoriasMoveis_Casa_Jardim.style.display = "none"; 
+                subcategoriasTecnologia.style.display = "none"; 
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                                  
+             
+            }
+            else if (selecionada === "Bebé e Criança") {
+                subcategoriasbebe.style.display = "block";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriaslazer.style.display = "none";    
+                subcategoriasTelemoveis_Tablets.style.display = "none";       
+                subcategoriasAgricultura.style.display = "none";        
+                subcategoriasAnimais.style.display = "none";       
+                subcategoriasDesporto.style.display = "none";            
+                subcategoriasModa.style.display = "none"; 
+                subcategoriasMoveis_Casa_Jardim.style.display = "none";  
+                subcategoriasTecnologia.style.display = "none";  
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                                
+             
+            }
+            else if (selecionada === "Lazer") {
+                subcategoriaslazer.style.display = "block";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";                
+                subcategoriasTelemoveis_Tablets.style.display = "none";       
+                subcategoriasAgricultura.style.display = "none";        
+                subcategoriasAnimais.style.display = "none";       
+                subcategoriasDesporto.style.display = "none";            
+                subcategoriasModa.style.display = "none";
+                subcategoriasMoveis_Casa_Jardim.style.display = "none";  
+                subcategoriasTecnologia.style.display = "none";
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                                  
+             
+            }
+             else if (selecionada === "Telemóveis e Tablets") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "block";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";               
+                subcategoriasAgricultura.style.display = "none";        
+                subcategoriasAnimais.style.display = "none";       
+                subcategoriasDesporto.style.display = "none";             
+                subcategoriasModa.style.display = "none";  
+                subcategoriasMoveis_Casa_Jardim.style.display = "none"; 
+                subcategoriasTecnologia.style.display = "none";    
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                               
+             
+            }
+            else if (selecionada === "Agricultura") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "block";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";              
+                subcategoriasAnimais.style.display = "none";       
+                subcategoriasDesporto.style.display = "none";           
+                subcategoriasModa.style.display = "none"; 
+                subcategoriasMoveis_Casa_Jardim.style.display = "none"; 
+                subcategoriasTecnologia.style.display = "none";  
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                                 
+             
+            } 
+            else if (selecionada === "Animais") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "none";                
+                subcategoriasAnimais.style.display = "block";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";              
+                subcategoriasDesporto.style.display = "none";            
+                subcategoriasModa.style.display = "none";
+                subcategoriasMoveis_Casa_Jardim.style.display = "none"; 
+                subcategoriasTecnologia.style.display = "none";                                   
+             
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";
+                
+            }
+            
+            else if (selecionada === "Desporto") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "none";                
+                subcategoriasDesporto.style.display = "block";                              
+                subcategoriasAnimais.style.display = "none";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";             
+                subcategoriasModa.style.display = "none";
+                subcategoriasMoveis_Casa_Jardim.style.display = "none"; 
+                subcategoriasTecnologia.style.display = "none"; 
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                                  
+              
+            }
+            else if (selecionada === "Moda") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "none";                
+                subcategoriasDesporto.style.display = "none";               
+                subcategoriasModa.style.display = "block";                                 
+                subcategoriasAnimais.style.display = "none";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";  
+                subcategoriasMoveis_Casa_Jardim.style.display = "none";  
+                subcategoriasTecnologia.style.display = "none";     
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";                             
+             
+            }
+            else if (selecionada === "Móveis, Casa e Jardim") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "none";                
+                subcategoriasDesporto.style.display = "none";               
+                subcategoriasModa.style.display = "none";              
+                subcategoriasMoveis_Casa_Jardim.style.display = "block";                                   
+                subcategoriasAnimais.style.display = "none";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";        
+                subcategoriasTecnologia.style.display = "none";
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";
+            }
+             else if (selecionada === "Tecnologia") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "none";                
+                subcategoriasDesporto.style.display = "none";               
+                subcategoriasModa.style.display = "none";                 
+                subcategoriasTecnologia.style.display = "block";
+                subcategoriasMoveis_Casa_Jardim.style.display = "none";                                   
+                subcategoriasAnimais.style.display = "none";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";
+                   subcategoriasEquipamentos_Ferramentas.style.display = "none";
+             
+            }
+             else if (selecionada === "Equipamentos e Ferramentas") {
+                subcategoriaslazer.style.display = "none";
+                subcategoriasTelemoveis_Tablets.style.display = "none";                
+                subcategoriasAgricultura.style.display = "none";                
+                subcategoriasDesporto.style.display = "none";               
+                subcategoriasModa.style.display = "none";                 
+                subcategoriasTecnologia.style.display = "none";                         
+                subcategoriasEquipamentos_Ferramentas.style.display = "block";
+                subcategoriasMoveis_Casa_Jardim.style.display = "none";                                   
+                subcategoriasAnimais.style.display = "none";
+                subcategoriasCarros.style.display = "none";
+                subcategoriasImoveis.style.display = "none";
+                subcategoriasbebe.style.display = "none";
+            }
+         
+        } else {
+            subcategoriasDiv.style.display = "none";
+        }
+    });
+
+    const categoriaLinks = document.querySelectorAll(".categorias a");
+
+    categoriaLinks.forEach(function (link) {
+        link.addEventListener("click", function () {
+            var categoriaSelecionada = link.querySelector("p").textContent;
+            var categoriaTexto = document.getElementById("categoria-texto");
+            var categoriaSelecionadaDiv = document.querySelector(".categoria-selecionada");
+
+            categoriaTexto.textContent = categoriaSelecionada;
+            categoriaSelecionadaDiv.style.display = "block";
+            var categoriasDiv = document.querySelector(".categorias");
+            categoriasDiv.style.display = "none";
+
+            var subcategoriaTexto = document.getElementById("subcategoria-texto");
+            subcategoriaTexto.textContent = "";
+            document.querySelector(".subcategoria-selecionada").style.display = "none";
+            i = 1;
+
+            document.getElementById("categoria-input").value = categoriaSelecionada;            
+             document.getElementById("subcategoria-input").value = "";
+            getUsers();
+        });
+    });
+
+    document.getElementById("removerCategoria").addEventListener("click", function () {
+        var subcategoriasDiv = document.querySelector(".Sub-categorias");
+        var categoriaTexto = document.getElementById("categoria-texto");
+        categoriaTexto.textContent = "";
+        document.querySelector(".categoria-selecionada").style.display = "none";
+        subcategoriasDiv.style.display = "none";
+        var subcategoriaTexto = document.getElementById("subcategoria-texto");
+        subcategoriaTexto.textContent = "";
+        document.querySelector(".subcategoria-selecionada").style.display = "none";
+        i = 0;
+          document.getElementById("categoria-input").value = "";
+             document.getElementById("subcategoria-input").value = "";
+              getUsers();
+    });
+
+
+    const subcategoriaLinks = document.querySelectorAll(".Sub-categorias a");
+
+    subcategoriaLinks.forEach(function (link) {
+        link.addEventListener("click", function () {
+            var subcategoriaSelecionada = link.querySelector("p").textContent;
+            var subcategoriaTexto = document.getElementById("subcategoria-texto");
+            var subcategoriaSelecionadaDiv = document.querySelector(".subcategoria-selecionada");
+
+            subcategoriaTexto.textContent = subcategoriaSelecionada;
+            subcategoriaSelecionadaDiv.style.display = "block";
+            var SubcategoriasDiv = document.querySelector(".Sub-categorias");
+            SubcategoriasDiv.style.display = "none";                       
+             document.getElementById("subcategoria-input").value = subcategoriaSelecionada;
+              getUsers();
+        });
+    });
+
+
+
+    document.getElementById("removerSubcategoria").addEventListener("click", function () {
+        var subcategoriaTexto = document.getElementById("subcategoria-texto");
+        subcategoriaTexto.textContent = "";
+        document.querySelector(".subcategoria-selecionada").style.display = "none";        
+             document.getElementById("subcategoria-input").value = "";
+              getUsers();
+    });
+
+    categoriaLinks.forEach(function (link) {
+        link.addEventListener("click", function () {
+            var categoriaSelecionada = link.querySelector("p").textContent;
+            var categoriaTexto = document.getElementById("categoria-texto");
+            var categoriaSelecionadaDiv = document.querySelector(".categoria-selecionada");
+
+            categoriaTexto.textContent = categoriaSelecionada;
+            categoriaSelecionadaDiv.style.display = "block";
+
+            selecionada = categoriaTexto.textContent;
+            i = 1;
+             getUsers();
+        });
+    });
+
+function getUsers() {
+    var subcategoria = document.getElementById("subcategoria-input").value;
+    var categoria = document.getElementById("categoria-input").value;
+    var de_Preco = document.getElementById("DE").value;
+    var para_Preco = document.getElementById("PARA").value;
+
+    $.ajax({
+        url: '/Anuncios/GetanunciosByInput',
+        type: 'GET',
+        dataType: 'json',
+        data: { categoria: categoria, subcategoria: subcategoria, de_Preco: de_Preco, para_Preco: para_Preco },
+        success: function (data) {
+            $('#lista_card').empty(); // Limpa a lista de cartões antes de adicionar novos
+
+            var addedAnuncios = new Set(); // Conjunto para verificar duplicados
+
+            // Itera sobre os itens recebidos
+            for (var i = 0; i < data.length; i++) {
+                let item = data[i]; // Use let to create a new block-scoped variable
+
+                // Verifica se o anúncio já foi adicionado
+                if (addedAnuncios.has(item.id_anuncio)) {
+                    continue;
+                }
+                addedAnuncios.add(item.id_anuncio);
+
+                // Aqui vamos fazer uma nova chamada AJAX para obter a URL da imagem
+                $.ajax({
+                    url: '/Anuncios/GetImageLink',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { imagemDestaque: item.imagem_destaque }, // Passando o valor de item.imagem_destaque
+                    success: function (imageUrl) {
+                        // Agora que temos a URL da imagem, podemos usar para construir o HTML do card
+                        var cardHtml = '<div class="cardProduto">' +
+                            '<div class="imgProduto">' +
+                            '<img class="card-img-top" src="' + imageUrl + '" alt="Imagem do Produto" />' +
+                            '</div>' +
+                            '<div class="card-info">' +
+                            '<p id="titulo">' + item.titulo + '</p>' +
+                            '<p id="Preco">' + item.preco + '€</p>' +
+                            '<p id="localizacao_hora">' + item.localizacao + '</p>' +
+                            '<div class="button-container">' +
+                            '<a href="/Anuncios/Details/' + item.id_anuncio + '" id="botao_anunciar">Ver Anúncio</a>' +
+                            '<form action="/Favoritos/Create" method="post">' +
+                            '<input type="hidden" name="Id_Anuncio" value="' + item.id_anuncio + '">' +
+                            '<button type="submit" id="botao_anunciar">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">' +
+                            '<path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.920 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />' +
+                            '</svg>' +
+                            '</button>' +
+                            '</form>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+
+                        $('#lista_card').append(cardHtml); // Adiciona o HTML do card à lista de cartões
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error(xhr.responseText);
+        }
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+   
+</script>
+
+}
+
+
